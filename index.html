@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veltron Labs — The Future, Built Here</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050508;
+    --surface: #0d0d14;
+    --border: rgba(0,200,255,0.12);
+    --cyan: #00c8ff;
+    --cyan2: #00ffcc;
+    --white: #f0f4ff;
+    --muted: #6a7090;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.35;
+  }
+
+  /* ===================== INTRO ===================== */
+  #intro {
+    position: fixed;
+    inset: 0;
+    background: #020204;
+    z-index: 5000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  #intro.fade-out { animation: introFade 0.9s ease forwards; }
+  @keyframes introFade {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.04); pointer-events: none; }
+  }
+
+  .intro-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    opacity: 0;
+    animation: gridIn 0.6s 0.2s ease forwards;
+  }
+  @keyframes gridIn { to { opacity: 1; } }
+
+  .intro-scanline {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    top: -2px;
+    animation: scanDown 1.2s 0.3s cubic-bezier(0.4,0,0.2,1) forwards;
+    opacity: 0.7;
+    box-shadow: 0 0 20px rgba(0,200,255,0.6);
+  }
+  @keyframes scanDown { from { top: -2px; } to { top: 102%; } }
+
+  .intro-center {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+  }
+
+  .hex-wrap {
+    opacity: 0;
+    transform: scale(0.5) rotate(-30deg);
+    animation: hexIn 0.7s 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  @keyframes hexIn { to { opacity: 1; transform: scale(1) rotate(0deg); } }
+  .hex-pulse { animation: hexGlow 1.5s 1.2s ease-in-out infinite; }
+  @keyframes hexGlow {
+    0%, 100% { filter: drop-shadow(0 0 20px rgba(0,200,255,0.4)); }
+    50% { filter: drop-shadow(0 0 50px rgba(0,200,255,0.85)); }
+  }
+
+  .intro-rings {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px; height: 160px;
+    pointer-events: none;
+  }
+  .intro-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(0,200,255,0.2);
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%) scale(0);
+    animation: ringExpand 2s ease-out infinite;
+  }
+  .intro-ring:nth-child(1) { width: 140px; height: 140px; animation-delay: 0.8s; }
+  .intro-ring:nth-child(2) { width: 140px; height: 140px; animation-delay: 1.4s; }
+  .intro-ring:nth-child(3) { width: 140px; height: 140px; animation-delay: 2.0s; }
+  @keyframes ringExpand {
+    0% { transform: translate(-50%,-50%) scale(0.8); opacity: 0.8; }
+    100% { transform: translate(-50%,-50%) scale(3.5); opacity: 0; }
+  }
+
+  .intro-wordmark {
+    opacity: 0;
+    transform: translateY(16px);
+    animation: wordIn 0.6s 1.0s ease forwards;
+    text-align: center;
+    margin-top: 28px;
+  }
+  @keyframes wordIn { to { opacity: 1; transform: translateY(0); } }
+
+  .intro-wordmark h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 3.2rem;
+    letter-spacing: 0.15em;
+    background: linear-gradient(135deg, var(--cyan), var(--cyan2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .intro-wordmark p {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .intro-tagline {
+    opacity: 0;
+    animation: wordIn 0.6s 1.4s ease forwards;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    margin-top: 32px;
+  }
+
+  .intro-bar {
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--cyan2));
+    border-radius: 2px;
+    margin-top: 36px;
+    animation: barGrow 1.2s 1.6s cubic-bezier(0.4,0,0.2,1) forwards;
+    box-shadow: 0 0 12px rgba(0,200,255,0.5);
+  }
+  @keyframes barGrow { to { width: 240px; } }
+
+  .intro-status {
+    opacity: 0;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-top: 14px;
+    animation: wordIn 0.4s 2.0s ease forwards;
+  }
+
+  .corner {
+    position: absolute;
+    width: 28px; height: 28px;
+    opacity: 0;
+    animation: wordIn 0.4s 0.6s ease forwards;
+  }
+  .corner.tl { top: 36px; left: 36px; border-top: 1px solid var(--cyan); border-left: 1px solid var(--cyan); }
+  .corner.tr { top: 36px; right: 36px; border-top: 1px solid var(--cyan); border-right: 1px solid var(--cyan); }
+  .corner.bl { bottom: 36px; left: 36px; border-bottom: 1px solid var(--cyan); border-left: 1px solid var(--cyan); }
+  .corner.br { bottom: 36px; right: 36px; border-bottom: 1px solid var(--cyan); border-right: 1px solid var(--cyan); }
+
+  /* ===================== MAIN SITE ===================== */
+  #main-site { opacity: 0; transition: opacity 0.8s ease; }
+  #main-site.visible { opacity: 1; }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 60px;
+    background: rgba(5,5,8,0.7);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-text { color: var(--cyan); }
+  .logo-text span { color: var(--white); }
+  nav ul { list-style: none; display: flex; gap: 36px; }
+  nav ul a { color: var(--muted); text-decoration: none; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; transition: color 0.2s; }
+  nav ul a:hover { color: var(--cyan); }
+  .nav-cta { background: transparent !important; border: 1px solid var(--cyan) !important; color: var(--cyan) !important; padding: 9px 22px; border-radius: 4px; }
+  .nav-cta:hover { background: rgba(0,200,255,0.1) !important; box-shadow: 0 0 20px rgba(0,200,255,0.2); }
+
+  .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 120px 40px 80px; position: relative; overflow: hidden; }
+  .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(0,200,255,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.04) 1px, transparent 1px); background-size: 60px 60px; mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%); }
+  .hero-orb { position: absolute; width: 700px; height: 700px; border-radius: 50%; background: radial-gradient(circle, rgba(0,200,255,0.12) 0%, rgba(0,255,204,0.04) 40%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: orbPulse 4s ease-in-out infinite; }
+  @keyframes orbPulse { 0%, 100% { transform: translate(-50%,-50%) scale(1); opacity: 1; } 50% { transform: translate(-50%,-50%) scale(1.08); opacity: 0.7; } }
+
+  .badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.25); border-radius: 100px; padding: 6px 18px; font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan); margin-bottom: 36px; animation: fadeUp 0.8s ease both; }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); animation: dotBlink 1.5s ease-in-out infinite; }
+  @keyframes dotBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+
+  .hero h1 { font-family: 'Orbitron', sans-serif; font-size: clamp(2.8rem, 7vw, 6rem); font-weight: 900; line-height: 1.05; margin-bottom: 28px; animation: fadeUp 0.8s 0.1s ease both; }
+  .hero h1 .gradient { background: linear-gradient(135deg, var(--cyan), var(--cyan2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { font-size: 1.1rem; color: var(--muted); max-width: 560px; line-height: 1.7; margin-bottom: 52px; animation: fadeUp 0.8s 0.2s ease both; }
+  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; animation: fadeUp 0.8s 0.3s ease both; }
+
+  .btn-primary { display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(135deg, var(--cyan), var(--cyan2)); color: #000; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 0.82rem; letter-spacing: 0.08em; padding: 16px 34px; border-radius: 6px; text-decoration: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 0 30px rgba(0,200,255,0.35); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 50px rgba(0,200,255,0.5); }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 10px; background: transparent; color: var(--white); font-family: 'Syne', sans-serif; font-weight: 600; font-size: 0.9rem; padding: 16px 34px; border-radius: 6px; text-decoration: none; border: 1px solid rgba(255,255,255,0.12); transition: border-color 0.2s, background 0.2s; }
+  .btn-secondary:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+
+  .stats { display: flex; justify-content: center; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); }
+  .stat { flex: 1; max-width: 220px; padding: 36px 20px; text-align: center; border-right: 1px solid var(--border); }
+  .stat:last-child { border-right: none; }
+  .stat-num { font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 700; color: var(--cyan); text-shadow: 0 0 20px rgba(0,200,255,0.4); }
+  .stat-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 6px; }
+
+  .section { padding: 120px 60px; max-width: 1200px; margin: 0 auto; }
+  .section-tag { font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cyan); margin-bottom: 16px; }
+  .section-title { font-family: 'Orbitron', sans-serif; font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 700; margin-bottom: 16px; line-height: 1.15; }
+  .section-sub { color: var(--muted); font-size: 1rem; max-width: 480px; line-height: 1.7; margin-bottom: 64px; }
+
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+  .product-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 36px; position: relative; overflow: hidden; transition: border-color 0.3s, transform 0.3s; }
+  .product-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); opacity: 0; transition: opacity 0.3s; }
+  .product-card:hover { border-color: rgba(0,200,255,0.3); transform: translateY(-4px); }
+  .product-card:hover::before { opacity: 1; }
+  .product-card.featured { border-color: rgba(0,200,255,0.3); background: linear-gradient(135deg, rgba(0,200,255,0.06), rgba(0,255,204,0.03)); grid-column: span 2; }
+  .product-icon { width: 48px; height: 48px; border-radius: 10px; background: rgba(0,200,255,0.1); border: 1px solid rgba(0,200,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 24px; }
+  .product-icon img { width: 100%; height: 100%; display: block; object-fit: contain; border-radius: 8px; }
+  .product-name { font-family: 'Orbitron', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 10px; color: var(--white); }
+  .product-desc { color: var(--muted); font-size: 0.88rem; line-height: 1.7; margin-bottom: 24px; }
+  .product-tag { display: inline-block; background: rgba(0,200,255,0.08); border: 1px solid rgba(0,200,255,0.2); color: var(--cyan); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 12px; border-radius: 4px; }
+
+  .axon-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .axon-inner { max-width: 1200px; margin: 0 auto; padding: 120px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .axon-visual { position: relative; height: 360px; border-radius: 16px; background: linear-gradient(135deg, rgba(0,200,255,0.08), rgba(0,255,204,0.04)); border: 1px solid rgba(0,200,255,0.2); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+  .axon-visual::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(0,200,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(0,200,255,0.06) 1px, transparent 1px); background-size: 30px 30px; }
+  .axon-logo-big { font-family: 'Orbitron', sans-serif; font-size: 3.5rem; font-weight: 900; background: linear-gradient(135deg, var(--cyan), var(--cyan2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; position: relative; z-index: 1; animation: orbPulse 3s ease-in-out infinite; }
+  .axon-rings { position: absolute; width: 200px; height: 200px; border-radius: 50%; border: 1px solid rgba(0,200,255,0.15); animation: ringExpand2 2.5s ease-out infinite; }
+  .axon-rings:nth-child(2) { animation-delay: 0.8s; }
+  .axon-rings:nth-child(3) { animation-delay: 1.6s; }
+  @keyframes ringExpand2 { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(2.5); opacity: 0; } }
+  .axon-content h2 { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 700; line-height: 1.2; margin-bottom: 20px; }
+  .axon-content p { color: var(--muted); line-height: 1.8; margin-bottom: 16px; font-size: 0.95rem; }
+  .feature-list { list-style: none; margin: 28px 0 40px; }
+  .feature-list li { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.9rem; color: var(--white); }
+  .feature-list li::before { content: '→'; color: var(--cyan); font-size: 0.8rem; flex-shrink: 0; }
+
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+  .value-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .value-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+  .value-card-icon { font-size: 1.5rem; margin-bottom: 12px; }
+  .value-card-title { font-family: 'Orbitron', sans-serif; font-size: 0.78rem; font-weight: 700; color: var(--cyan); letter-spacing: 0.05em; margin-bottom: 8px; }
+  .value-card-desc { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+
+  .footer-cta { text-align: center; padding: 140px 40px; position: relative; overflow: hidden; }
+  .footer-cta::before { content: ''; position: absolute; width: 600px; height: 600px; border-radius: 50%; background: radial-gradient(circle, rgba(0,200,255,0.1) 0%, transparent 70%); top: 50%; left: 50%; transform: translate(-50%,-50%); pointer-events: none; }
+  .footer-cta h2 { font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 5vw, 4rem); font-weight: 900; margin-bottom: 20px; line-height: 1.1; }
+  .footer-cta p { color: var(--muted); font-size: 1rem; margin-bottom: 48px; }
+
+  footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex; align-items: center; justify-content: space-between; background: var(--surface); }
+  footer p { color: var(--muted); font-size: 0.8rem; }
+  .footer-links { display: flex; gap: 28px; }
+  .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.8rem; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--cyan); }
+
+  .divider { width: 1px; height: 80px; background: linear-gradient(to bottom, transparent, var(--cyan), transparent); margin: 0 auto; opacity: 0.4; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: rgba(0,200,255,0.3); border-radius: 2px; }
+
+  @media (max-width: 768px) {
+    nav { padding: 18px 24px; }
+    nav ul { display: none; }
+    .section { padding: 80px 24px; }
+    .axon-inner { grid-template-columns: 1fr; padding: 80px 24px; gap: 40px; }
+    .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    .product-card.featured { grid-column: span 1; }
+    footer { flex-direction: column; gap: 20px; text-align: center; }
+    .stats { flex-wrap: wrap; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .intro-wordmark h1 { font-size: 2rem; }
+    .corner { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro">
+  <div class="intro-grid"></div>
+  <div class="intro-scanline"></div>
+  <div class="corner tl"></div>
+  <div class="corner tr"></div>
+  <div class="corner bl"></div>
+  <div class="corner br"></div>
+
+  <div class="intro-center">
+    <div class="intro-rings">
+      <div class="intro-ring"></div>
+      <div class="intro-ring"></div>
+      <div class="intro-ring"></div>
+    </div>
+
+    <div class="hex-wrap hex-pulse">
+      <svg width="130" height="150" viewBox="0 0 200 232" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#00c8ff"/>
+            <stop offset="100%" stop-color="#00ffcc"/>
+          </linearGradient>
+        </defs>
+        <polygon points="100,4 188,52 188,148 100,196 12,148 12,52" fill="none" stroke="#00c8ff" stroke-width="1" stroke-opacity="0.2"/>
+        <polygon points="100,18 176,62 176,138 100,182 24,138 24,62" fill="none" stroke="#00c8ff" stroke-width="1" stroke-opacity="0.35"/>
+        <polygon points="100,32 164,68 164,142 100,178 36,142 36,68" fill="rgba(0,200,255,0.1)" stroke="url(#hg)" stroke-width="2.5"/>
+        <polygon points="68,84 100,152 132,84 118,84 100,124 82,84" fill="url(#hg)"/>
+        <line x1="12" y1="52" x2="2" y2="44" stroke="#00c8ff" stroke-width="1.5" stroke-opacity="0.6"/>
+        <line x1="188" y1="52" x2="198" y2="44" stroke="#00c8ff" stroke-width="1.5" stroke-opacity="0.6"/>
+        <line x1="188" y1="148" x2="198" y2="156" stroke="#00c8ff" stroke-width="1.5" stroke-opacity="0.6"/>
+        <line x1="12" y1="148" x2="2" y2="156" stroke="#00c8ff" stroke-width="1.5" stroke-opacity="0.6"/>
+      </svg>
+    </div>
+
+    <div class="intro-wordmark">
+      <h1>VELTRON LABS</h1>
+      <p>Technology &middot; AI &middot; Innovation</p>
+    </div>
+
+    <div class="intro-tagline">// Initializing systems...</div>
+    <div class="intro-bar"></div>
+    <div class="intro-status">EST. 2026</div>
+  </div>
+</div>
+
+<!-- MAIN SITE -->
+<div id="main-site">
+
+<nav>
+  <div class="logo">
+    <svg width="28" height="32" viewBox="0 0 200 232" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00c8ff"/><stop offset="100%" stop-color="#00ffcc"/></linearGradient></defs>
+      <polygon points="100,32 164,68 164,142 100,178 36,142 36,68" fill="rgba(0,200,255,0.1)" stroke="url(#ng)" stroke-width="4"/>
+      <polygon points="68,84 100,152 132,84 118,84 100,124 82,84" fill="url(#ng)"/>
+    </svg>
+    <span class="logo-text">VELTRON<span> LABS</span></span>
+  </div>
+  <ul>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#axon">Veltron Ai</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="https://axonai0.netlify.app" class="nav-cta">Launch App</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-orb"></div>
+  <div class="badge"><div class="badge-dot"></div>Now in active development</div>
+  <h1>The Future,<br><span class="gradient">Built Here.</span></h1>
+  <p>Veltron Labs is an independent technology company building next-generation AI tools, applications, and digital experiences for the world of tomorrow.</p>
+  <div class="hero-btns">
+    <a href="https://axonai0.netlify.app" class="btn-primary">&#9889; Try out Veltron Ai now!</a>
+    <a href="#products" class="btn-secondary">Explore Products &rarr;</a>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><div class="stat-num">1</div><div class="stat-label">AI Model Live</div></div>
+  <div class="stat"><div class="stat-num">&infin;</div><div class="stat-label">Possibilities</div></div>
+  <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Independent</div></div>
+  <div class="stat"><div class="stat-num">24/7</div><div class="stat-label">Always Building</div></div>
+</div>
+
+<section class="section" id="products">
+  <div class="section-tag">// What We Build</div>
+  <h2 class="section-title">Our Products</h2>
+  <p class="section-sub">From AI to apps, Veltron Labs ships tools that push the boundaries of what's possible on the web.</p>
+  <div class="products-grid">
+    <div class="product-card featured">
+      <div class="product-icon"><img src="axon-logo.png" alt="Random" /></div>
+      <div class="product-name">Veltron Ai</div>
+      <div class="product-desc">Our flagship AI assistant. Veltron is a powerful, fast, and intelligent conversational AI built for real-world use. Ask it anything, build with it, or just see what it can do.</div>
+      <span class="product-tag">Currently Unavailable</span>
+    </div>
+    <div class="product-card">
+      <div class="product-icon">&#9889;</div>
+      <div class="product-name">Veltron Apps</div>
+      <div class="product-desc">A suite of web-based tools and utilities crafted for speed and simplicity. Always free. Always sharp.</div>
+      <span class="product-tag">Coming Soon</span>
+    </div>
+    <div class="product-card">
+      <div class="product-icon">&#x1F52C;</div>
+      <div class="product-name">Labs Research</div>
+      <div class="product-desc">Experiments, prototypes, and cutting-edge ideas from the Veltron skunkworks. Some make it. Some don't. All are interesting.</div>
+      <span class="product-tag">In Progress</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<div class="axon-section" id="axon">
+  <div class="axon-inner">
+    <div class="axon-visual">
+      <div class="axon-rings"></div>
+      <div class="axon-rings"></div>
+      <div class="axon-rings"></div>
+      <img src="axon-logo.png" class="axon-logo">
+      
+    </div>
+    <div class="axon-content">
+      <div class="section-tag">// Flagship Product</div>
+      <h2>Meet <span style="background:linear-gradient(135deg,var(--cyan),var(--cyan2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Veltron Ai</span></h2>
+      <p>Veltron is Veltron Labs' most advanced project — a fully custom AI assistant built from the ground up to be powerful, intuitive, and always available.</p>
+      <ul class="feature-list">
+        <li>Intelligent, fast responses to any question</li>
+        <li>Sleek modern interface built for real use</li>
+        <li>Powered by cutting-edge AI technology</li>
+        <li>Free to access, no account required</li>
+        <li>Constantly improving and updated regularly</li>
+      </ul>
+      <a href="https://axonai0.netlify.app" class="btn-primary" style="text-decoration:none;display:inline-flex;">&#9889; Try out Veltron Ai now!</a>
+    </div>
+  </div>
+</div>
+
+<section class="section" id="about">
+  <div class="about-grid">
+    <div>
+      <div class="section-tag">// Who We Are</div>
+      <h2 class="section-title">An independent lab building things that matter.</h2>
+      <p class="section-sub" style="margin-bottom:0;">Veltron Labs was founded with a single mission: build technology that's actually impressive. No fluff. No gimmicks. Just real tools, real AI, and real results.</p>
+    </div>
+    <div class="value-cards">
+      <div class="value-card"><div class="value-card-icon">&#x1F680;</div><div class="value-card-title">Ship Fast</div><div class="value-card-desc">We build and release quickly. Real products, real users, real impact.</div></div>
+      <div class="value-card"><div class="value-card-icon">&#x1F9E0;</div><div class="value-card-title">AI First</div><div class="value-card-desc">Everything we build has intelligence at its core. That's not a feature — it's the foundation.</div></div>
+      <div class="value-card"><div class="value-card-icon">&#x1F310;</div><div class="value-card-title">Open Web</div><div class="value-card-desc">Our products live on the web, for everyone. No installs, no paywalls, no friction.</div></div>
+      <div class="value-card"><div class="value-card-icon">&#x1F525;</div><div class="value-card-title">Ambitious</div><div class="value-card-desc">We don't aim small. Every product is built to be the best version of what it could be.</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="footer-cta">
+  <h2>Ready to try<br><span style="background:linear-gradient(135deg,var(--cyan),var(--cyan2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">the future?</span></h2>
+  <p>Veltron Ai is live and waiting. No signup, no waiting list.</p>
+  <a href="https://axonai0.netlify.app" class="btn-primary" style="text-decoration:none;font-size:1rem;padding:20px 48px;">&#9889; Try out Veltron Ai now!</a>
+</div>
+
+<footer>
+  <div class="logo">
+    <svg width="22" height="26" viewBox="0 0 200 232" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="fg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00c8ff"/><stop offset="100%" stop-color="#00ffcc"/></linearGradient></defs>
+      <polygon points="100,32 164,68 164,142 100,178 36,142 36,68" fill="rgba(0,200,255,0.1)" stroke="url(#fg)" stroke-width="4"/>
+      <polygon points="68,84 100,152 132,84 118,84 100,124 82,84" fill="url(#fg)"/>
+    </svg>
+    <span class="logo-text" style="font-size:0.95rem;">VELTRON<span> LABS</span></span>
+  </div>
+  <p>&copy; 2026 Veltron Labs. All rights reserved.</p>
+  <div class="footer-links">
+    <a href="https://axonai0.netlify.app">Veltron Ai</a>
+    <a href="#products">Products</a>
+    <a href="#about">About</a>
+  </div>
+</footer>
+
+</div>
+
+<script>
+  document.body.style.overflow = 'hidden';
+  setTimeout(function() {
+    var intro = document.getElementById('intro');
+    var main = document.getElementById('main-site');
+    intro.classList.add('fade-out');
+    setTimeout(function() {
+      intro.style.display = 'none';
+      main.classList.add('visible');
+      document.body.style.overflow = '';
+    }, 900);
+  }, 3400);
+</script>
+</body>
+</html>
