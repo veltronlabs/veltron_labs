@@ -150,18 +150,18 @@ nav.scrolled{background:rgba(1,1,8,.9);backdrop-filter:blur(30px);border-bottom:
 
 /* ── PRODUCT CARDS ── */
 .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:rgba(0,200,255,.07)}
-.pcard{background:var(--s1);padding:52px;position:relative;overflow:hidden;transition:background .35s}
-.pcard-glow{position:absolute;inset:0;background:radial-gradient(circle at 0% 0%,rgba(0,200,255,.07),transparent 60%);opacity:0;transition:opacity .5s}
+.pcard{background:var(--s1);padding:52px;position:relative;overflow:hidden;transition:background .35s}.pcard>*{position:relative;z-index:1}
+.pcard-glow{position:absolute;inset:0;background:radial-gradient(circle at 0% 0%,rgba(0,200,255,.07),transparent 60%);opacity:0;transition:opacity .5s;pointer-events:none;z-index:0}
 .pcard:hover{background:var(--s2)}
 .pcard:hover .pcard-glow{opacity:1}
 .pcard.feat{grid-column:span 2;background:linear-gradient(135deg,rgba(0,200,255,.04),rgba(123,95,255,.03))}
 .pcard.feat:hover{background:linear-gradient(135deg,rgba(0,200,255,.08),rgba(123,95,255,.05))}
 /* Holo shimmer on featured card */
-.pcard.feat::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,rgba(0,200,255,.03) 60deg,transparent 120deg,rgba(0,255,204,.03) 180deg,transparent 240deg,rgba(123,95,255,.03) 300deg,transparent 360deg);animation:holo 8s linear infinite;pointer-events:none}
+.pcard.feat::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg at 50% 50%,transparent 0deg,rgba(0,200,255,.03) 60deg,transparent 120deg,rgba(0,255,204,.03) 180deg,transparent 240deg,rgba(123,95,255,.03) 300deg,transparent 360deg);animation:holo 8s linear infinite;pointer-events:none;z-index:0}
 @keyframes holo{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .pcard::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--c),transparent);opacity:0;transition:opacity .35s}
 .pcard:hover::after{opacity:1}
-.p-num{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.22em;color:var(--m);margin-bottom:36px}
+.p-num{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.22em;color:var(--m);margin-bottom:36px;position:relative;z-index:1}
 .p-ico{width:54px;height:54px;border-radius:8px;background:rgba(0,200,255,.06);border:1px solid rgba(0,200,255,.14);display:flex;align-items:center;justify-content:center;margin-bottom:28px;transition:all .3s;position:relative;overflow:hidden}
 .p-ico::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,200,255,.1),transparent);opacity:0;transition:opacity .3s}
 .pcard:hover .p-ico{border-color:rgba(0,200,255,.4);box-shadow:0 0 20px rgba(0,200,255,.15)}
@@ -172,7 +172,7 @@ nav.scrolled{background:rgba(1,1,8,.9);backdrop-filter:blur(30px);border-bottom:
 .p-desc{color:var(--m2);font-size:.87rem;line-height:1.8;margin-bottom:28px}
 .p-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(0,255,204,.05);border:1px solid rgba(0,255,204,.16);color:var(--c2);font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.14em;text-transform:uppercase;padding:5px 12px;border-radius:2px;margin-bottom:28px}
 .p-tag::before{content:'';width:4px;height:4px;border-radius:50%;background:var(--c2);box-shadow:0 0 6px var(--c2)}
-.p-lnk{display:inline-flex;align-items:center;gap:8px;color:var(--c);font-size:.82rem;font-weight:600;text-decoration:none;letter-spacing:.04em;transition:gap .2s,text-shadow .2s}
+.p-lnk{display:inline-flex;align-items:center;gap:8px;color:var(--c);font-size:.82rem;font-weight:600;text-decoration:none;letter-spacing:.04em;transition:gap .2s,text-shadow .2s;position:relative;z-index:1}
 .p-lnk:hover{gap:16px;text-shadow:0 0 20px rgba(0,200,255,.6)}
 
 /* ── FEATURE SECTION ── */
