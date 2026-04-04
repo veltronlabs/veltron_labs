@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Feedback & Report — Veltron Labs</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="axon-logo.png">
+  <link rel="apple-touch-icon" href="axon-logo.png">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#02020a;--s1:#06060f;--s2:#0a0a18;
@@ -341,7 +343,7 @@ Sent via Veltron Labs Feedback Page`;
       method:'POST',
       headers:{'Content-Type':'application/json','Accept':'application/json'},
       body:JSON.stringify({
-        access_key:'bc1829b5-d885-4c0d-b09e-59a6b78c7c51', // ← replace after setup (see note below)
+        access_key:'YOUR_WEB3FORMS_KEY', // ← replace after setup (see note below)
         subject:`[Veltron Feedback] ${rtype} — ${name}`,
         from_name:'Veltron Labs Feedback',
         replyto:email||'',
