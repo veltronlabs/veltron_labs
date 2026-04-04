@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VLab — Veltron Labs</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Syne:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050508;
+    --surface: #0d0d14;
+    --surface2: #12121c;
+    --border: rgba(0,200,255,0.12);
+    --cyan: #00c8ff;
+    --cyan2: #00ffcc;
+    --white: #f0f4ff;
+    --muted: #6a7090;
+    --green: #00ff88;
+    --orange: #ff8800;
+    --red: #ff4466;
+    --purple: #aa88ff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 9999; opacity: 0.3;
+  }
+  body::after {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.025) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; height: 58px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,5,8,0.92); backdrop-filter: blur(14px);
+    z-index: 100;
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo-text {
+    font-family: 'Orbitron', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em;
+    background: linear-gradient(135deg, var(--cyan), var(--cyan2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .nav-logo-text span { opacity: 0.6; }
+  .nav-center { display: flex; align-items: center; gap: 8px; }
+  .nav-title { font-family: 'Orbitron', sans-serif; font-size: 0.95rem; font-weight: 700; letter-spacing: 0.1em; }
+  .nav-title span {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .nav-badge {
+    font-size: 0.58rem; font-family: 'Orbitron', sans-serif; letter-spacing: 0.1em;
+    padding: 3px 8px; border-radius: 20px;
+    border: 1px solid rgba(0,200,255,0.3); color: var(--cyan); background: rgba(0,200,255,0.08);
+  }
+  .back-btn {
+    font-size: 0.75rem; color: var(--muted); text-decoration: none;
+    border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; transition: all 0.2s;
+  }
+  .back-btn:hover { color: var(--cyan); border-color: rgba(0,200,255,0.3); }
+
+  /* HERO */
+  .hero {
+    text-align: center; padding: 70px 24px 50px;
+    position: relative; z-index: 1;
+  }
+  .hero-orb {
+    position: absolute; width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,200,255,0.08) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(0,200,255,0.07); border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 100px; padding: 5px 16px;
+    font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--cyan);
+    margin-bottom: 24px;
+  }
+  .hero-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); animation: blink 1.5s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+  .hero h1 {
+    font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 6vw, 3.8rem);
+    font-weight: 900; line-height: 1.1; margin-bottom: 18px;
+  }
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero p { font-size: 0.95rem; color: var(--muted); max-width: 500px; margin: 0 auto 40px; line-height: 1.7; }
+
+  /* TAB SWITCHER */
+  .tabs {
+    display: flex; gap: 8px; justify-content: center;
+    margin-bottom: 50px; position: relative; z-index: 1;
+  }
+  .tab-btn {
+    font-family: 'Orbitron', sans-serif; font-size: 0.72rem; font-weight: 700;
+    letter-spacing: 0.1em; padding: 12px 28px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--surface);
+    color: var(--muted); cursor: pointer; transition: all 0.2s;
+  }
+  .tab-btn:hover { color: var(--white); border-color: rgba(0,200,255,0.25); }
+  .tab-btn.active {
+    background: linear-gradient(135deg, rgba(0,200,255,0.15), rgba(0,255,204,0.08));
+    border-color: var(--cyan); color: var(--cyan);
+    box-shadow: 0 0 20px rgba(0,200,255,0.15);
+  }
+
+  /* SECTIONS */
+  .section { display: none; padding: 0 24px 60px; max-width: 1100px; margin: 0 auto; position: relative; z-index: 1; }
+  .section.active { display: block; }
+
+  /* EXPERIMENT GRID */
+  .exp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 40px; }
+  .exp-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px; cursor: pointer;
+    transition: all 0.25s; position: relative; overflow: hidden;
+  }
+  .exp-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--card-color, linear-gradient(90deg, var(--cyan), var(--cyan2)));
+    opacity: 0; transition: opacity 0.25s;
+  }
+  .exp-card:hover { border-color: rgba(0,200,255,0.3); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+  .exp-card:hover::before { opacity: 1; }
+  .exp-icon { font-size: 2rem; margin-bottom: 12px; }
+  .exp-name { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+  .exp-desc { font-size: 0.78rem; color: var(--muted); line-height: 1.55; }
+  .exp-tag {
+    display: inline-block; margin-top: 12px;
+    font-size: 0.58rem; font-family: 'Orbitron', sans-serif; letter-spacing: 0.08em;
+    padding: 3px 8px; border-radius: 4px;
+  }
+
+  /* LAB CANVAS */
+  .lab-canvas {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; overflow: hidden; display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .lab-canvas.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  .lab-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .lab-header-left { display: flex; align-items: center; gap: 10px; }
+  .lab-title { font-family: 'Orbitron', sans-serif; font-size: 0.82rem; font-weight: 700; }
+  .lab-close {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    font-size: 0.72rem; padding: 5px 12px; border-radius: 6px; cursor: pointer;
+    font-family: 'Syne', sans-serif; transition: all 0.2s;
+  }
+  .lab-close:hover { color: var(--red); border-color: rgba(255,68,102,0.3); }
+  .lab-body { padding: 24px; }
+
+  /* ── CHEMISTRY EXPERIMENTS ── */
+
+  /* Acid/Base */
+  .beaker-row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 24px; }
+  .beaker-wrap { text-align: center; }
+  .beaker-label { font-size: 0.68rem; color: var(--muted); margin-bottom: 6px; font-family: 'Orbitron', sans-serif; letter-spacing: 0.06em; }
+  .beaker {
+    width: 80px; height: 100px; border: 2px solid rgba(255,255,255,0.2);
+    border-top: none; border-radius: 0 0 14px 14px;
+    position: relative; overflow: hidden; background: rgba(255,255,255,0.03);
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .beaker:hover { border-color: rgba(255,255,255,0.4); }
+  .beaker-liquid {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 60%; transition: background 0.6s ease, height 0.4s ease;
+    border-radius: 0 0 12px 12px;
+  }
+  .beaker-name { font-size: 0.62rem; color: var(--white); margin-top: 5px; }
+  .mix-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan2));
+    border: none; color: #050508; font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+    padding: 10px 22px; border-radius: 8px; cursor: pointer; transition: all 0.2s;
+    align-self: center;
+  }
+  .mix-btn:hover { transform: scale(1.04); box-shadow: 0 0 16px rgba(0,200,255,0.4); }
+  .result-box {
+    padding: 14px 18px; border-radius: 10px;
+    border: 1px solid var(--border); background: rgba(0,0,0,0.3);
+    font-size: 0.82rem; line-height: 1.6; min-height: 60px;
+    transition: all 0.4s;
+  }
+  .result-box strong { color: var(--cyan); }
+
+  /* Fire experiment */
+  .fire-controls { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .material-btn {
+    padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--muted); font-family: 'Syne', sans-serif;
+    font-size: 0.76rem; cursor: pointer; transition: all 0.2s;
+  }
+  .material-btn:hover { color: var(--white); border-color: rgba(255,136,0,0.4); }
+  .material-btn.selected { color: var(--orange); border-color: var(--orange); background: rgba(255,136,0,0.08); }
+  .fire-stage {
+    height: 160px; border-radius: 12px; border: 1px solid var(--border);
+    background: rgba(0,0,0,0.5); position: relative; overflow: hidden;
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 10px;
+  }
+  .flame {
+    width: 60px; height: 0px;
+    background: radial-gradient(ellipse at bottom, #ff4400, #ff8800, #ffcc00, transparent);
+    border-radius: 50% 50% 30% 30%;
+    transition: height 0.5s ease;
+    filter: blur(2px);
+    position: relative;
+  }
+  .flame::after {
+    content: '';
+    position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 30px; height: 0px;
+    background: radial-gradient(ellipse at bottom, #ffffff88, #ffff0066, transparent);
+    border-radius: 50% 50% 30% 30%;
+    filter: blur(1px);
+    transition: height 0.5s ease;
+  }
+  .temp-display {
+    position: absolute; top: 12px; right: 12px;
+    font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--orange);
+    text-shadow: 0 0 20px rgba(255,136,0,0.6);
+  }
+
+  /* Electrolysis */
+  .electro-tank {
+    height: 140px; border: 2px solid rgba(0,200,255,0.3);
+    border-radius: 12px; background: rgba(0,100,150,0.15);
+    position: relative; overflow: hidden; margin-bottom: 16px;
+  }
+  .electro-water {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 75%;
+    background: linear-gradient(180deg, rgba(0,150,255,0.2), rgba(0,100,200,0.4));
+    border-radius: 0 0 10px 10px;
+  }
+  .electrode {
+    position: absolute; bottom: 15%; width: 8px; border-radius: 4px;
+    background: rgba(255,255,255,0.3);
+  }
+  .electrode.pos { left: 30%; height: 55%; }
+  .electrode.neg { right: 30%; height: 55%; }
+  .bubble { position: absolute; border-radius: 50%; animation: rise linear infinite; opacity: 0.7; }
+  @keyframes rise { 0%{transform:translateY(0);opacity:0.7} 100%{transform:translateY(-120px);opacity:0} }
+  .electro-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--cyan2));
+    border: none; color: #050508; font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem; font-weight: 700; padding: 10px 22px; border-radius: 8px;
+    cursor: pointer; transition: all 0.2s; margin-right: 10px;
+  }
+
+  /* ── CODING EXPERIMENTS ── */
+  .code-split { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .code-panel { display: flex; flex-direction: column; gap: 8px; }
+  .code-label {
+    font-family: 'Orbitron', sans-serif; font-size: 0.55rem;
+    letter-spacing: 0.15em; color: var(--muted);
+  }
+  .code-editor {
+    background: #0a0a10; border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    color: var(--cyan2); resize: none; outline: none;
+    width: 100%; min-height: 200px; line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+  .code-editor:focus { border-color: rgba(0,200,255,0.35); }
+  .run-btn {
+    background: linear-gradient(135deg, var(--green), var(--cyan));
+    border: none; color: #050508; font-family: 'Orbitron', sans-serif;
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em;
+    padding: 10px 22px; border-radius: 8px; cursor: pointer; transition: all 0.2s; align-self: flex-start;
+  }
+  .run-btn:hover { transform: scale(1.04); box-shadow: 0 0 16px rgba(0,255,136,0.4); }
+  .output-box {
+    background: #0a0a10; border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    color: var(--green); min-height: 200px; line-height: 1.6;
+    white-space: pre-wrap; overflow-y: auto;
+  }
+
+  /* Sorting visualizer */
+  .sort-canvas {
+    height: 180px; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
+    border-radius: 10px; display: flex; align-items: flex-end;
+    padding: 10px 8px; gap: 3px; overflow: hidden; margin-bottom: 12px;
+  }
+  .sort-bar {
+    flex: 1; background: linear-gradient(to top, var(--cyan), var(--cyan2));
+    border-radius: 3px 3px 0 0; transition: height 0.15s ease, background 0.15s;
+    min-width: 4px;
+  }
+  .sort-bar.comparing { background: linear-gradient(to top, var(--orange), #ffcc00); }
+  .sort-bar.sorted { background: linear-gradient(to top, var(--green), var(--cyan2)); }
+  .sort-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .sort-btn {
+    padding: 8px 16px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--muted); font-family: 'Syne', sans-serif;
+    font-size: 0.73rem; cursor: pointer; transition: all 0.2s;
+  }
+  .sort-btn:hover { color: var(--white); border-color: rgba(0,200,255,0.3); }
+  .sort-btn.active { color: var(--cyan); border-color: var(--cyan); background: rgba(0,200,255,0.08); }
+  .sort-speed { font-size: 0.72rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .sort-speed input { accent-color: var(--cyan); }
+
+  /* Gravity sim */
+  .gravity-canvas {
+    width: 100%; height: 260px; background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border); border-radius: 12px;
+    position: relative; overflow: hidden; cursor: crosshair;
+  }
+  .grav-ball {
+    position: absolute; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, rgba(255,255,255,0.4), var(--color));
+    box-shadow: 0 0 12px var(--color);
+    pointer-events: none;
+  }
+  .grav-controls { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; align-items: center; }
+  .grav-label { font-size: 0.7rem; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .grav-label input { accent-color: var(--cyan); width: 80px; }
+  .grav-clear {
+    padding: 7px 14px; border-radius: 7px; border: 1px solid rgba(255,68,102,0.3);
+    background: none; color: var(--red); font-family: 'Syne', sans-serif;
+    font-size: 0.72rem; cursor: pointer; transition: all 0.2s; margin-left: auto;
+  }
+  .grav-clear:hover { background: rgba(255,68,102,0.08); }
+
+  /* AI Explain box */
+  .ai-explain {
+    margin-top: 16px; padding: 14px 16px;
+    background: rgba(0,200,255,0.05); border: 1px solid rgba(0,200,255,0.15);
+    border-radius: 10px; font-size: 0.8rem; line-height: 1.65; color: var(--white);
+    display: none;
+  }
+  .ai-explain.visible { display: block; animation: fadeIn 0.3s ease; }
+  .ai-explain-label {
+    font-family: 'Orbitron', sans-serif; font-size: 0.52rem;
+    letter-spacing: 0.15em; color: var(--cyan); margin-bottom: 8px;
+  }
+  .ai-explain p { margin-bottom: 6px; }
+  .ai-explain p:last-child { margin-bottom: 0; }
+  .ai-thinking { color: var(--muted); font-style: italic; font-size: 0.78rem; }
+
+  @media (max-width: 680px) {
+    .code-split { grid-template-columns: 1fr; }
+    .exp-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="nav-brand">
+    <svg width="22" height="26" viewBox="0 0 200 232" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00c8ff"/><stop offset="100%" stop-color="#00ffcc"/></linearGradient></defs>
+      <polygon points="100,32 164,68 164,142 100,178 36,142 36,68" fill="rgba(0,200,255,0.1)" stroke="url(#ng)" stroke-width="4"/>
+      <polygon points="68,84 100,152 132,84 118,84 100,124 82,84" fill="url(#ng)"/>
+    </svg>
+    <span class="nav-logo-text">VELTRON<span> LABS</span></span>
+  </a>
+  <div class="nav-center">
+    <span class="nav-title">V<span>Lab</span></span>
+    <span class="nav-badge">BETA</span>
+  </div>
+  <a href="index.html" class="back-btn">← Home</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-orb"></div>
+  <div class="hero-tag"><div class="hero-dot"></div>Virtual Experiments</div>
+  <h1>The Lab is <span>Open.</span></h1>
+  <p>Run chemistry, physics, and coding experiments right in your browser. No equipment, no setup — just science.</p>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('chem')">🧪 Chemistry</button>
+  <button class="tab-btn" onclick="switchTab('physics')">⚛️ Physics</button>
+  <button class="tab-btn" onclick="switchTab('code')">💻 Coding</button>
+</div>
+
+<!-- CHEMISTRY -->
+<div class="section active" id="tab-chem">
+
+  <!-- Experiment cards -->
+  <div class="exp-grid" id="chem-grid">
+    <div class="exp-card" onclick="openExp('acid-base')">
+      <div class="exp-icon">⚗️</div>
+      <div class="exp-name">Acid & Base Mixing</div>
+      <div class="exp-desc">Mix acids and bases together and watch the neutralization reaction. See pH changes and color indicators.</div>
+      <span class="exp-tag" style="background:rgba(0,200,255,0.1);color:var(--cyan);border:1px solid rgba(0,200,255,0.2);">CHEMISTRY</span>
+    </div>
+    <div class="exp-card" onclick="openExp('fire')">
+      <div class="exp-icon">🔥</div>
+      <div class="exp-name">Combustion Lab</div>
+      <div class="exp-desc">Burn different materials and observe combustion temperatures, flame color, and byproducts produced.</div>
+      <span class="exp-tag" style="background:rgba(255,136,0,0.1);color:var(--orange);border:1px solid rgba(255,136,0,0.2);">THERMOCHEMISTRY</span>
+    </div>
+    <div class="exp-card" onclick="openExp('electro')">
+      <div class="exp-icon">⚡</div>
+      <div class="exp-name">Electrolysis</div>
+      <div class="exp-desc">Pass electricity through water and watch it split into hydrogen and oxygen gases at each electrode.</div>
+      <span class="exp-tag" style="background:rgba(170,136,255,0.1);color:var(--purple);border:1px solid rgba(170,136,255,0.2);">ELECTROCHEMISTRY</span>
+    </div>
+    <div class="exp-card" onclick="openExp('dna')">
+      <div class="exp-icon">🧬</div>
+      <div class="exp-name">DNA Builder</div>
+      <div class="exp-desc">Build a DNA strand base by base! Learn about adenine, thymine, guanine and cytosine and how they pair up.</div>
+      <span class="exp-tag" style="background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.2);">BIOLOGY</span>
+    </div>
+    <div class="exp-card" onclick="openExp('periodic')">
+      <div class="exp-icon">🔬</div>
+      <div class="exp-name">Element Explorer</div>
+      <div class="exp-desc">Explore elements from the periodic table! See their properties, electron config, and what they're used for.</div>
+      <span class="exp-tag" style="background:rgba(255,215,0,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.2);">PERIODIC TABLE</span>
+    </div>
+    <div class="exp-card" onclick="openExp('states')">
+      <div class="exp-icon">🌡️</div>
+      <div class="exp-name">States of Matter</div>
+      <div class="exp-desc">Heat or cool matter and watch particles change between solid, liquid, and gas states in real time.</div>
+      <span class="exp-tag" style="background:rgba(0,200,255,0.1);color:var(--cyan);border:1px solid rgba(0,200,255,0.2);">THERMODYNAMICS</span>
+    </div>
+  </div>
+
+  <!-- ACID BASE LAB -->
+  <div class="lab-canvas" id="exp-acid-base">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">⚗️</span>
+        <span class="lab-title">Acid & Base Mixing</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('acid-base')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <div class="beaker-row">
+        <div class="beaker-wrap">
+          <div class="beaker-label">CHEMICAL A</div>
+          <select id="chemA" onchange="updateBeakerA()" style="background:var(--surface2);border:1px solid var(--border);color:var(--white);padding:4px 8px;border-radius:6px;font-family:'Syne',sans-serif;font-size:0.72rem;margin-bottom:6px;width:100%;">
+            <option value="hcl">HCl (Strong Acid)</option>
+            <option value="h2so4">H₂SO₄ (Sulfuric Acid)</option>
+            <option value="hno3">HNO₃ (Nitric Acid)</option>
+            <option value="ch3cooh">CH₃COOH (Vinegar)</option>
+          </select>
+          <div class="beaker" id="beakerA">
+            <div class="beaker-liquid" id="liquidA" style="background:rgba(255,80,80,0.6);"></div>
+          </div>
+          <div class="beaker-name" id="nameA">pH 1 — Strong Acid</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;align-self:center;">
+          <button class="mix-btn" onclick="mixChemicals()">⚗️ Mix!</button>
+          <button class="mix-btn" style="background:rgba(255,255,255,0.1);color:var(--muted);border:1px solid var(--border);" onclick="resetMix()">↺ Reset</button>
+        </div>
+        <div class="beaker-wrap">
+          <div class="beaker-label">CHEMICAL B</div>
+          <select id="chemB" onchange="updateBeakerB()" style="background:var(--surface2);border:1px solid var(--border);color:var(--white);padding:4px 8px;border-radius:6px;font-family:'Syne',sans-serif;font-size:0.72rem;margin-bottom:6px;width:100%;">
+            <option value="naoh">NaOH (Strong Base)</option>
+            <option value="nh3">NH₃ (Ammonia)</option>
+            <option value="ca_oh2">Ca(OH)₂ (Lime Water)</option>
+            <option value="nahco3">NaHCO₃ (Baking Soda)</option>
+          </select>
+          <div class="beaker" id="beakerB">
+            <div class="beaker-liquid" id="liquidB" style="background:rgba(80,80,255,0.6);"></div>
+          </div>
+          <div class="beaker-name" id="nameB">pH 14 — Strong Base</div>
+        </div>
+        <div class="beaker-wrap" id="resultBeakerWrap" style="opacity:0;transition:opacity 0.4s;">
+          <div class="beaker-label">RESULT</div>
+          <div class="beaker" id="beakerResult">
+            <div class="beaker-liquid" id="liquidResult" style="background:rgba(100,100,100,0.4);"></div>
+          </div>
+          <div class="beaker-name" id="nameResult">—</div>
+        </div>
+      </div>
+      <div class="result-box" id="mixResult">Select two chemicals and hit Mix to run the reaction.</div>
+      <div class="ai-explain" id="ai-acid">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-acid-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIRE LAB -->
+  <div class="lab-canvas" id="exp-fire">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">🔥</span>
+        <span class="lab-title">Combustion Lab</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('fire')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">Select a material to burn and observe the combustion reaction:</p>
+      <div class="fire-controls" id="fireControls">
+        <button class="material-btn" onclick="selectMaterial(this,'wood',300,'#ff6600')">🪵 Wood</button>
+        <button class="material-btn" onclick="selectMaterial(this,'paper',180,'#ffaa00')">📄 Paper</button>
+        <button class="material-btn" onclick="selectMaterial(this,'magnesium',650,'#ffffff')">⚗️ Magnesium</button>
+        <button class="material-btn" onclick="selectMaterial(this,'alcohol',78,'#8844ff')">🍶 Alcohol</button>
+        <button class="material-btn" onclick="selectMaterial(this,'hydrogen',0,'#00aaff')">💧 Hydrogen</button>
+      </div>
+      <div class="fire-stage" id="fireStage">
+        <div class="temp-display" id="tempDisplay">— °C</div>
+        <div class="flame" id="flame"></div>
+      </div>
+      <div class="result-box" style="margin-top:12px;" id="fireResult">Select a material to begin the experiment.</div>
+      <div class="ai-explain" id="ai-fire">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-fire-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ELECTROLYSIS LAB -->
+  <div class="lab-canvas" id="exp-electro">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">⚡</span>
+        <span class="lab-title">Electrolysis of Water</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('electro')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <div class="electro-tank" id="electroTank">
+        <div class="electro-water"></div>
+        <div class="electrode pos" id="posElec" style="background:rgba(255,80,80,0.5);"></div>
+        <div class="electrode neg" id="negElec" style="background:rgba(80,80,255,0.5);"></div>
+        <div style="position:absolute;top:8px;left:30%;transform:translateX(-50%);font-size:0.6rem;color:rgba(255,80,80,0.8);font-family:'Orbitron',sans-serif;">+ ANODE</div>
+        <div style="position:absolute;top:8px;right:30%;transform:translateX(50%);font-size:0.6rem;color:rgba(80,80,255,0.8);font-family:'Orbitron',sans-serif;">− CATHODE</div>
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:14px;">
+        <button class="electro-btn" id="electroBtn" onclick="toggleElectro()">▶ Start Current</button>
+        <button class="electro-btn" style="background:rgba(255,255,255,0.08);color:var(--muted);border:1px solid var(--border);" onclick="resetElectro()">↺ Reset</button>
+      </div>
+      <div class="result-box" id="electroResult">Press Start Current to begin electrolysis.</div>
+      <div class="ai-explain" id="ai-electro">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-electro-text"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- DNA BUILDER LAB -->
+  <div class="lab-canvas" id="exp-dna">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">🧬</span>
+        <span class="lab-title">DNA Builder</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('dna')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">Click bases to add them to your DNA strand. Remember: A pairs with T, and G pairs with C!</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="material-btn" onclick="addBase('A')" style="color:#ff6688;border-color:rgba(255,102,136,0.4);background:rgba(255,102,136,0.08);">➕ Adenine (A)</button>
+        <button class="material-btn" onclick="addBase('T')" style="color:#ffaa44;border-color:rgba(255,170,68,0.4);background:rgba(255,170,68,0.08);">➕ Thymine (T)</button>
+        <button class="material-btn" onclick="addBase('G')" style="color:#44ff88;border-color:rgba(68,255,136,0.4);background:rgba(68,255,136,0.08);">➕ Guanine (G)</button>
+        <button class="material-btn" onclick="addBase('C')" style="color:#44aaff;border-color:rgba(68,170,255,0.4);background:rgba(68,170,255,0.08);">➕ Cytosine (C)</button>
+        <button class="material-btn" onclick="clearDNA()" style="color:var(--red);border-color:rgba(255,68,102,0.3);">🗑 Clear</button>
+      </div>
+      <div id="dnaStrand" style="min-height:120px;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:12px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:0.85rem;overflow-x:auto;white-space:nowrap;"></div>
+      <div class="result-box" style="margin-top:12px;" id="dnaResult">Click a base above to start building your DNA strand!</div>
+      <div class="ai-explain" id="ai-dna">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-dna-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ELEMENT EXPLORER LAB -->
+  <div class="lab-canvas" id="exp-periodic">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">🔬</span>
+        <span class="lab-title">Element Explorer</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('periodic')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">Pick an element to explore its properties:</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="elemBtns">
+        <button class="sort-btn" onclick="showElement('H')">H — Hydrogen</button>
+        <button class="sort-btn" onclick="showElement('He')">He — Helium</button>
+        <button class="sort-btn" onclick="showElement('C')">C — Carbon</button>
+        <button class="sort-btn" onclick="showElement('O')">O — Oxygen</button>
+        <button class="sort-btn" onclick="showElement('Na')">Na — Sodium</button>
+        <button class="sort-btn" onclick="showElement('Fe')">Fe — Iron</button>
+        <button class="sort-btn" onclick="showElement('Au')">Au — Gold</button>
+        <button class="sort-btn" onclick="showElement('U')">U — Uranium</button>
+      </div>
+      <div id="elemDisplay" style="display:none;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:12px;padding:20px;">
+        <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap;">
+          <div id="elemSymbol" style="font-family:'Orbitron',sans-serif;font-size:3.5rem;font-weight:900;width:90px;height:90px;display:flex;align-items:center;justify-content:center;border-radius:12px;border:2px solid;flex-shrink:0;"></div>
+          <div style="flex:1;">
+            <div id="elemName" style="font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:4px;"></div>
+            <div id="elemNumber" style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;"></div>
+            <div id="elemFacts" style="font-size:0.8rem;color:var(--white);line-height:1.7;"></div>
+          </div>
+        </div>
+        <div id="elemElectrons" style="margin-top:14px;"></div>
+      </div>
+      <div class="ai-explain" id="ai-periodic" style="margin-top:12px;">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-periodic-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATES OF MATTER LAB -->
+  <div class="lab-canvas" id="exp-states">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">🌡️</span>
+        <span class="lab-title">States of Matter</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('states')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;">Drag the temperature slider to heat or cool the matter and watch the particles change state!</p>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap;">
+        <span style="font-size:1.1rem;">🧊</span>
+        <input type="range" id="tempSlider" min="-50" max="200" value="-20" style="flex:1;accent-color:var(--cyan);min-width:120px;" oninput="updateStates()">
+        <span style="font-size:1.1rem;">🔥</span>
+        <span id="tempLabel" style="font-family:'Orbitron',sans-serif;font-size:1rem;font-weight:700;color:var(--cyan);min-width:70px;">-20°C</span>
+      </div>
+      <canvas id="statesCanvas" width="600" height="200" style="width:100%;height:200px;background:#050508;border:1px solid var(--border);border-radius:12px;display:block;"></canvas>
+      <div class="result-box" style="margin-top:12px;" id="statesResult">At -20°C, this substance is in a SOLID state. Particles are tightly packed and vibrating in place.</div>
+      <div class="ai-explain" id="ai-states">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-states-text"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- PHYSICS -->
+<div class="section" id="tab-physics">
+  <div class="exp-grid" id="physics-grid">
+    <div class="exp-card" onclick="openExp('pendulum')">
+      <div class="exp-icon">🎱</div>
+      <div class="exp-name">Pendulum Lab</div>
+      <div class="exp-desc">Swing a pendulum and discover how length and gravity affect the period. Slow it down, speed it up, change gravity!</div>
+      <span class="exp-tag" style="background:rgba(0,200,255,0.1);color:var(--cyan);border:1px solid rgba(0,200,255,0.2);">MECHANICS</span>
+    </div>
+    <div class="exp-card" onclick="openExp('wave')">
+      <div class="exp-icon">〰️</div>
+      <div class="exp-name">Wave Simulator</div>
+      <div class="exp-desc">Create and combine waves! Adjust frequency, amplitude, and see interference patterns form — just like sound and light.</div>
+      <span class="exp-tag" style="background:rgba(170,136,255,0.1);color:var(--purple);border:1px solid rgba(170,136,255,0.2);">WAVES</span>
+    </div>
+    <div class="exp-card" onclick="openExp('gravity')">
+      <div class="exp-icon">🪐</div>
+      <div class="exp-name">Gravity Simulator</div>
+      <div class="exp-desc">Click to spawn planets and watch them orbit, collide, and interact under gravity — simulated in real time.</div>
+      <span class="exp-tag" style="background:rgba(170,136,255,0.1);color:var(--purple);border:1px solid rgba(170,136,255,0.2);">PHYSICS SIM</span>
+    </div>
+    <div class="exp-card" onclick="openExp('projectile')">
+      <div class="exp-icon">🚀</div>
+      <div class="exp-name">Projectile Motion</div>
+      <div class="exp-desc">Launch a cannonball and adjust angle, speed and gravity. Watch the parabolic arc and learn projectile physics!</div>
+      <span class="exp-tag" style="background:rgba(255,136,0,0.1);color:var(--orange);border:1px solid rgba(255,136,0,0.2);">KINEMATICS</span>
+    </div>
+  </div>
+
+  <!-- PENDULUM LAB -->
+  <div class="lab-canvas" id="exp-pendulum">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">🎱</span>
+        <span class="lab-title">Pendulum Lab</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('pendulum')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <canvas id="pendulumCanvas" width="600" height="220" style="width:100%;height:220px;background:#050508;border:1px solid var(--border);border-radius:12px;display:block;margin-bottom:12px;"></canvas>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+        <label class="grav-label">Length: <input type="range" id="pendLen" min="60" max="180" value="120" oninput="updatePendulum()"> <span id="pendLenVal">120px</span></label>
+        <label class="grav-label">Gravity: <input type="range" id="pendGrav" min="1" max="30" value="9" oninput="updatePendulum()"> <span id="pendGravVal">9.8 m/s²</span></label>
+        <label class="grav-label">Angle: <input type="range" id="pendAngle" min="5" max="80" value="45" oninput="resetPendulum()"> <span id="pendAngleVal">45°</span></label>
+      </div>
+      <div class="result-box" id="pendResult">Watch the pendulum swing! The period (time for one full swing) depends only on the LENGTH and GRAVITY — not the ball's weight!</div>
+      <div class="ai-explain" id="ai-pendulum">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-pendulum-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WAVE SIMULATOR -->
+  <div class="lab-canvas" id="exp-wave">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">〰️</span>
+        <span class="lab-title">Wave Simulator</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('wave')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <canvas id="waveCanvas" width="600" height="200" style="width:100%;height:200px;background:#050508;border:1px solid var(--border);border-radius:12px;display:block;margin-bottom:12px;"></canvas>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+        <label class="grav-label">Wave 1 Freq: <input type="range" id="wave1Freq" min="1" max="10" value="2" step="0.5" oninput="updateWave()"> <span id="w1fVal">2</span>Hz</label>
+        <label class="grav-label">Wave 1 Amp: <input type="range" id="wave1Amp" min="10" max="80" value="50" oninput="updateWave()"> <span id="w1aVal">50</span></label>
+        <label class="grav-label">Wave 2 Freq: <input type="range" id="wave2Freq" min="1" max="10" value="3" step="0.5" oninput="updateWave()"> <span id="w2fVal">3</span>Hz</label>
+        <label class="grav-label">Wave 2 Amp: <input type="range" id="wave2Amp" min="0" max="80" value="30" oninput="updateWave()"> <span id="w2aVal">30</span></label>
+      </div>
+      <div class="result-box" id="waveResult">Two waves combining! When crests meet = bigger wave (constructive). When crest meets trough = smaller wave (destructive interference).</div>
+      <div class="ai-explain" id="ai-wave">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-wave-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRAVITY SIM (physics tab copy) -->
+  <div class="lab-canvas" id="exp-gravity2" style="display:none;"></div>
+
+  <!-- PROJECTILE MOTION -->
+  <div class="lab-canvas" id="exp-projectile">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">🚀</span>
+        <span class="lab-title">Projectile Motion</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('projectile')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <canvas id="projCanvas" width="600" height="220" style="width:100%;height:220px;background:#050508;border:1px solid var(--border);border-radius:12px;display:block;margin-bottom:12px;cursor:pointer;" onclick="launchProjectile()"></canvas>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
+        <label class="grav-label">Angle: <input type="range" id="projAngle" min="5" max="85" value="45"> <span id="projAngleVal">45°</span></label>
+        <label class="grav-label">Speed: <input type="range" id="projSpeed" min="50" max="200" value="120"> <span id="projSpeedVal">120</span></label>
+        <label class="grav-label">Gravity: <input type="range" id="projGrav" min="1" max="30" value="10"> <span id="projGravVal">10</span> m/s²</label>
+        <button class="run-btn" style="padding:8px 16px;font-size:0.68rem;" onclick="launchProjectile()">🚀 Launch!</button>
+        <button class="sort-btn" onclick="clearProjectile()">↺ Reset</button>
+      </div>
+      <div class="result-box" id="projResult">Set the angle and speed, then click Launch! The optimal angle for maximum distance is always 45°.</div>
+      <div class="ai-explain" id="ai-projectile">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-projectile-text"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<div class="section" id="tab-code">
+
+  <div class="exp-grid" id="code-grid">
+    <div class="exp-card" onclick="openExp('sandbox')">
+      <div class="exp-icon">💻</div>
+      <div class="exp-name">JS Sandbox</div>
+      <div class="exp-desc">Write and run JavaScript code live. See output instantly — perfect for experimenting with loops, functions and logic.</div>
+      <span class="exp-tag" style="background:rgba(255,215,0,0.1);color:#ffd700;border:1px solid rgba(255,215,0,0.2);">JAVASCRIPT</span>
+    </div>
+    <div class="exp-card" onclick="openExp('sort')">
+      <div class="exp-icon">📊</div>
+      <div class="exp-name">Sorting Visualizer</div>
+      <div class="exp-desc">Watch Bubble Sort, Selection Sort and Insertion Sort work step by step with animated bars. See exactly how algorithms think.</div>
+      <span class="exp-tag" style="background:rgba(0,200,255,0.1);color:var(--cyan);border:1px solid rgba(0,200,255,0.2);">ALGORITHMS</span>
+    </div>
+    <div class="exp-card" onclick="openExp('binary')">
+      <div class="exp-icon" style="font-family:'JetBrains Mono',monospace;font-size:1.2rem;">01</div>
+      <div class="exp-name">Binary & Hex Converter</div>
+      <div class="exp-desc">Convert numbers between decimal, binary, and hexadecimal. See how computers actually store and represent numbers!</div>
+      <span class="exp-tag" style="background:rgba(0,255,136,0.1);color:var(--green);border:1px solid rgba(0,255,136,0.2);">NUMBER SYSTEMS</span>
+    </div>
+    <div class="exp-card" onclick="openExp('cipher')">
+      <div class="exp-icon">🔐</div>
+      <div class="exp-name">Caesar Cipher</div>
+      <div class="exp-desc">Encrypt and decrypt secret messages using the Caesar cipher — the same code Julius Caesar used 2000 years ago!</div>
+      <span class="exp-tag" style="background:rgba(170,136,255,0.1);color:var(--purple);border:1px solid rgba(170,136,255,0.2);">CRYPTOGRAPHY</span>
+    </div>
+  </div>
+
+  <!-- JS SANDBOX -->
+  <div class="lab-canvas" id="exp-sandbox">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">💻</span>
+        <span class="lab-title">JavaScript Sandbox</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('sandbox')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <div class="code-split">
+        <div class="code-panel">
+          <div class="code-label">// YOUR CODE</div>
+          <textarea class="code-editor" id="codeInput" spellcheck="false">// Try some JavaScript!
+let numbers = [1, 2, 3, 4, 5];
+
+// Loop through and print squares
+for (let n of numbers) {
+  console.log(n + " squared = " + (n * n));
+}
+
+// A simple function
+function greet(name) {
+  return "Hello, " + name + "!";
+}
+
+console.log(greet("Veltron Labs"));</textarea>
+          <button class="run-btn" onclick="runCode()">▶ Run Code</button>
+        </div>
+        <div class="code-panel">
+          <div class="code-label">// OUTPUT</div>
+          <div class="output-box" id="codeOutput">// Output will appear here...</div>
+        </div>
+      </div>
+      <div class="ai-explain" id="ai-sandbox">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-sandbox-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SORTING VISUALIZER -->
+  <div class="lab-canvas" id="exp-sort">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">📊</span>
+        <span class="lab-title">Sorting Algorithm Visualizer</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('sort')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <div class="sort-canvas" id="sortCanvas"></div>
+      <div class="sort-controls">
+        <button class="sort-btn active" id="btn-bubble" onclick="selectSort('bubble')">Bubble Sort</button>
+        <button class="sort-btn" id="btn-selection" onclick="selectSort('selection')">Selection Sort</button>
+        <button class="sort-btn" id="btn-insertion" onclick="selectSort('insertion')">Insertion Sort</button>
+        <button class="sort-btn" onclick="generateBars()" style="color:var(--cyan2);border-color:rgba(0,255,204,0.3);">↺ New Array</button>
+        <button class="sort-btn" onclick="startSort()" style="color:var(--green);border-color:rgba(0,255,136,0.3);">▶ Sort!</button>
+        <div class="sort-speed">Speed: <input type="range" id="sortSpeed" min="1" max="10" value="5"></div>
+      </div>
+      <div class="result-box" style="margin-top:12px;" id="sortResult">Select an algorithm and press Sort!</div>
+      <div class="ai-explain" id="ai-sort">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-sort-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRAVITY SIM -->
+  <div class="lab-canvas" id="exp-gravity">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">🪐</span>
+        <span class="lab-title">Gravity Simulator</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('gravity')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;">Click anywhere in the space below to spawn a planet!</p>
+      <div class="gravity-canvas" id="gravCanvas" onclick="spawnBall(event)"></div>
+      <div class="grav-controls">
+        <div class="grav-label">Gravity: <input type="range" id="gravStrength" min="1" max="20" value="8"></div>
+        <div class="grav-label">Size: <input type="range" id="ballSize" min="10" max="40" value="20"></div>
+        <button class="grav-clear" onclick="clearBalls()">✕ Clear</button>
+      </div>
+      <div class="ai-explain" id="ai-gravity" style="display:block;">
+        <div class="ai-explain-label">// HOW IT WORKS</div>
+        <div><p>Every ball obeys <strong style="color:var(--cyan)">Newton's Law of Gravity</strong> — each one pulls on every other one based on their mass and distance. The bigger the ball, the more gravity it has. When they get close, they speed up (like planets orbiting a star). Click to add more and watch the chaos!</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BINARY & HEX CONVERTER -->
+  <div class="lab-canvas" id="exp-binary">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;font-family:'JetBrains Mono',monospace;">01</span>
+        <span class="lab-title">Binary & Hex Converter</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('binary')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">Type a number in any field and watch it convert instantly!</p>
+      <div style="display:grid;gap:14px;">
+        <div>
+          <div class="code-label" style="margin-bottom:6px;">// DECIMAL (base 10 — what humans use)</div>
+          <input id="decInput" type="number" min="0" max="65535" placeholder="e.g. 255" oninput="convertFrom('dec')"
+            style="width:100%;background:#0a0a10;border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--cyan2);font-family:'JetBrains Mono',monospace;font-size:1rem;outline:none;">
+        </div>
+        <div>
+          <div class="code-label" style="margin-bottom:6px;">// BINARY (base 2 — what computers use)</div>
+          <input id="binInput" placeholder="e.g. 11111111" oninput="convertFrom('bin')"
+            style="width:100%;background:#0a0a10;border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--green);font-family:'JetBrains Mono',monospace;font-size:1rem;outline:none;">
+        </div>
+        <div>
+          <div class="code-label" style="margin-bottom:6px;">// HEXADECIMAL (base 16 — used in colors, memory)</div>
+          <input id="hexInput" placeholder="e.g. FF" oninput="convertFrom('hex')"
+            style="width:100%;background:#0a0a10;border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--purple);font-family:'JetBrains Mono',monospace;font-size:1rem;outline:none;text-transform:uppercase;">
+        </div>
+      </div>
+      <div id="binaryViz" style="margin-top:14px;display:flex;gap:4px;flex-wrap:wrap;"></div>
+      <div class="result-box" style="margin-top:12px;" id="binaryResult">Type a number in any box above to start converting!</div>
+      <div class="ai-explain" id="ai-binary">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-binary-text"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CAESAR CIPHER -->
+  <div class="lab-canvas" id="exp-cipher">
+    <div class="lab-header">
+      <div class="lab-header-left">
+        <span style="font-size:1.2rem;">🔐</span>
+        <span class="lab-title">Caesar Cipher</span>
+      </div>
+      <button class="lab-close" onclick="closeExp('cipher')">✕ Close</button>
+    </div>
+    <div class="lab-body">
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:14px;">Type your message and choose a shift key to encrypt it — or paste a cipher to decode it!</p>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
+        <label class="grav-label" style="font-size:0.8rem;">Shift Key: <input type="range" id="cipherShift" min="1" max="25" value="13" oninput="runCipher()"> <span id="cipherShiftVal" style="font-family:'Orbitron',sans-serif;font-size:0.9rem;color:var(--cyan);font-weight:700;">13</span></label>
+        <button class="sort-btn" onclick="swapCipher()" style="color:var(--cyan2);border-color:rgba(0,255,204,0.3);">⇄ Swap Encrypt/Decrypt</button>
+      </div>
+      <div style="display:grid;gap:10px;">
+        <div>
+          <div class="code-label" style="margin-bottom:6px;">// INPUT MESSAGE</div>
+          <textarea id="cipherInput" placeholder="Type your secret message here..." oninput="runCipher()"
+            style="width:100%;background:#0a0a10;border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--white);font-family:'JetBrains Mono',monospace;font-size:0.85rem;resize:none;min-height:80px;outline:none;line-height:1.6;">Hello Veltron Labs!</textarea>
+        </div>
+        <div>
+          <div class="code-label" style="margin-bottom:6px;" id="cipherOutputLabel">// ENCRYPTED OUTPUT (shift +13)</div>
+          <div id="cipherOutput" style="background:#0a0a10;border:1px solid rgba(170,136,255,0.3);border-radius:8px;padding:12px;color:var(--purple);font-family:'JetBrains Mono',monospace;font-size:0.85rem;min-height:80px;line-height:1.6;word-break:break-all;"></div>
+        </div>
+      </div>
+      <div id="cipherAlphabet" style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:var(--muted);line-height:1.8;"></div>
+      <div class="ai-explain" id="ai-cipher">
+        <div class="ai-explain-label">// AI EXPLANATION</div>
+        <div id="ai-cipher-text"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const API_KEY = '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';
+
+// ── TAB SWITCHER ──
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  closeAllExps();
+}
+
+// ── EXP OPEN/CLOSE ──
+function openExp(id) {
+  closeAllExps();
+  const el = document.getElementById('exp-' + id);
+  if (!el) return;
+  el.classList.add('active');
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (id === 'sort') generateBars();
+  if (id === 'gravity') startGravity();
+  if (id === 'pendulum') startPendulum();
+  if (id === 'wave') startWave();
+  if (id === 'states') { initStates(); updateStates(); }
+  if (id === 'cipher') runCipher();
+  if (id === 'projectile') initProjectile();
+}
+function closeExp(id) {
+  document.getElementById('exp-' + id).classList.remove('active');
+  if (id === 'gravity') stopGravity();
+  if (id === 'pendulum') stopPendulum();
+  if (id === 'wave') stopWave();
+  if (id === 'states') stopStates();
+  if (id === 'projectile') stopProjectile();
+}
+function closeAllExps() {
+  document.querySelectorAll('.lab-canvas').forEach(c => c.classList.remove('active'));
+  stopGravity(); stopPendulum(); stopWave(); stopStates(); stopProjectile();
+}
+
+// ── AI EXPLAIN ──
+async function aiExplain(boxId, textId, prompt) {
+  const box = document.getElementById(boxId);
+  const textEl = document.getElementById(textId);
+  box.classList.add('visible');
+  textEl.innerHTML = '<p class="ai-thinking">🤖 EduBot is thinking...</p>';
+  try {
+    const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + API_KEY, 'X-Title': 'VLab by Veltron Labs' },
+      body: JSON.stringify({
+        model: 'liquid/lfm-2.5-1.2b-thinking:free',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 200
+      })
+    });
+    const data = await res.json();
+    const reply = data.choices?.[0]?.message?.content || 'Could not load explanation.';
+    textEl.innerHTML = reply.split('\n').filter(l=>l.trim()).map(l=>`<p>${l}</p>`).join('');
+  } catch(e) {
+    textEl.innerHTML = '<p style="color:var(--red)">Could not load AI explanation right now.</p>';
+  }
+}
+
+// ────────────────────────────────
+// CHEMISTRY EXPERIMENTS
+// ────────────────────────────────
+
+const ACIDS = {
+  hcl:      { name:'HCl', ph:1,  color:'rgba(255,60,60,0.7)',   label:'pH 1 — Strong Acid' },
+  h2so4:    { name:'H₂SO₄', ph:0, color:'rgba(220,40,40,0.8)', label:'pH 0 — Very Strong Acid' },
+  hno3:     { name:'HNO₃', ph:1,  color:'rgba(255,100,40,0.7)', label:'pH 1 — Strong Acid' },
+  ch3cooh:  { name:'CH₃COOH', ph:4, color:'rgba(255,180,40,0.6)', label:'pH 4 — Weak Acid' }
+};
+const BASES = {
+  naoh:   { name:'NaOH', ph:14, color:'rgba(60,60,255,0.7)',  label:'pH 14 — Strong Base' },
+  nh3:    { name:'NH₃',  ph:11, color:'rgba(100,80,255,0.6)', label:'pH 11 — Weak Base' },
+  ca_oh2: { name:'Ca(OH)₂', ph:12, color:'rgba(80,120,255,0.65)', label:'pH 12 — Moderate Base' },
+  nahco3: { name:'NaHCO₃', ph:8, color:'rgba(120,140,255,0.5)', label:'pH 8 — Weak Base' }
+};
+
+function updateBeakerA() {
+  const a = ACIDS[document.getElementById('chemA').value];
+  document.getElementById('liquidA').style.background = a.color;
+  document.getElementById('nameA').textContent = a.label;
+}
+function updateBeakerB() {
+  const b = BASES[document.getElementById('chemB').value];
+  document.getElementById('liquidB').style.background = b.color;
+  document.getElementById('nameB').textContent = b.label;
+}
+
+function mixChemicals() {
+  const a = ACIDS[document.getElementById('chemA').value];
+  const b = BASES[document.getElementById('chemB').value];
+  const avgPh = (a.ph + b.ph) / 2;
+  let resultColor, resultLabel, resultText;
+
+  if (avgPh < 3) { resultColor='rgba(255,80,80,0.7)'; resultLabel='pH ~'+avgPh.toFixed(1)+' — Acidic'; }
+  else if (avgPh < 6) { resultColor='rgba(255,160,60,0.65)'; resultLabel='pH ~'+avgPh.toFixed(1)+' — Mildly Acidic'; }
+  else if (avgPh < 8) { resultColor='rgba(100,200,100,0.6)'; resultLabel='pH ~'+avgPh.toFixed(1)+' — Neutral'; }
+  else if (avgPh < 11) { resultColor='rgba(100,120,255,0.6)'; resultLabel='pH ~'+avgPh.toFixed(1)+' — Mildly Basic'; }
+  else { resultColor='rgba(80,80,255,0.75)'; resultLabel='pH ~'+avgPh.toFixed(1)+' — Basic'; }
+
+  const isNeutral = avgPh >= 6.5 && avgPh <= 7.5;
+  resultText = `<strong>${a.name} + ${b.name}</strong> → ${isNeutral ? 'Salt + Water (neutralization!) 💧' : 'Partially neutralized solution'}<br>Result pH ≈ ${avgPh.toFixed(1)} — ${resultLabel}`;
+
+  document.getElementById('liquidResult').style.background = resultColor;
+  document.getElementById('nameResult').textContent = resultLabel;
+  document.getElementById('resultBeakerWrap').style.opacity = '1';
+  document.getElementById('mixResult').innerHTML = resultText;
+
+  aiExplain('ai-acid','ai-acid-text',
+    `In 1-2 short sentences, explain what happens when ${a.name} (pH ${a.ph}) mixes with ${b.name} (pH ${b.ph}) in simple terms for a student. Result pH is about ${avgPh.toFixed(1)}.`
+  );
+}
+
+function resetMix() {
+  document.getElementById('resultBeakerWrap').style.opacity = '0';
+  document.getElementById('mixResult').innerHTML = 'Select two chemicals and hit Mix to run the reaction.';
+  document.getElementById('ai-acid').classList.remove('visible');
+}
+
+// FIRE
+const MATERIALS = {
+  wood:      { temp:300,  color:'#ff6600', text:'Wood burns at ~300°C. It combusts with oxygen to produce CO₂, water vapor, ash, and smoke. C + O₂ → CO₂', flame:120 },
+  paper:     { temp:180,  color:'#ffaa00', text:'Paper ignites at ~180°C (Fahrenheit 451!). It\'s mostly cellulose which burns quickly producing CO₂ and water.', flame:80 },
+  magnesium: { temp:650,  color:'#ffffff', text:'Magnesium burns at ~650°C with a blinding white flame. 2Mg + O₂ → 2MgO. Never look directly at it!', flame:160 },
+  alcohol:   { temp:78,   color:'#8844ff', text:'Alcohol (ethanol) burns with a nearly invisible blue/purple flame at ~78°C. C₂H₅OH + 3O₂ → 2CO₂ + 3H₂O', flame:90 },
+  hydrogen:  { temp:0,    color:'#00aaff', text:'Hydrogen gas burns with a pale blue flame. It\'s highly flammable and produces ONLY water: 2H₂ + O₂ → 2H₂O 💧', flame:100 }
+};
+let selectedMat = null;
+
+function selectMaterial(btn, mat, temp, color) {
+  document.querySelectorAll('.material-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedMat = mat;
+  const m = MATERIALS[mat];
+  const flame = document.getElementById('flame');
+  flame.style.height = m.flame + 'px';
+  flame.style.background = `radial-gradient(ellipse at bottom, ${m.color}cc, ${m.color}88, transparent)`;
+  flame.style.setProperty('--after-h', m.flame * 0.6 + 'px');
+  document.getElementById('tempDisplay').textContent = temp + '°C';
+  document.getElementById('tempDisplay').style.color = m.color;
+  document.getElementById('fireResult').innerHTML = m.text;
+  aiExplain('ai-fire','ai-fire-text',
+    `In 1-2 sentences, explain the combustion of ${mat} for a young student. Keep it simple and interesting.`
+  );
+}
+
+// ELECTROLYSIS
+let electroRunning = false;
+let electroInterval = null;
+let bubbleCount = 0;
+
+function toggleElectro() {
+  electroRunning = !electroRunning;
+  document.getElementById('electroBtn').textContent = electroRunning ? '⏸ Stop Current' : '▶ Start Current';
+  if (electroRunning) {
+    document.getElementById('electroResult').innerHTML = '⚡ Current flowing! H₂O is splitting at the electrodes...<br><strong style="color:var(--cyan)">Cathode (−):</strong> 2H₂O + 2e⁻ → H₂ + 2OH⁻ (Hydrogen gas)<br><strong style="color:var(--red)">Anode (+):</strong> 2H₂O → O₂ + 4H⁺ + 4e⁻ (Oxygen gas)';
+    electroInterval = setInterval(spawnBubbles, 300);
+    aiExplain('ai-electro','ai-electro-text',
+      'In 2 sentences, explain electrolysis of water for a young student — what happens at each electrode and why.'
+    );
+  } else {
+    clearInterval(electroInterval);
+    document.getElementById('electroResult').innerHTML = 'Current stopped. The bubbles were H₂ (hydrogen) at the cathode and O₂ (oxygen) at the anode.';
+  }
+}
+
+function spawnBubbles() {
+  if (!electroRunning) return;
+  const tank = document.getElementById('electroTank');
+  // H2 at cathode (right/neg)
+  for (let i = 0; i < 2; i++) spawnBubble(tank, '68%', '#8888ff', 4 + Math.random()*4);
+  // O2 at anode (left/pos)
+  spawnBubble(tank, '30%', '#ff8888', 6 + Math.random()*5);
+}
+
+function spawnBubble(parent, x, color, size) {
+  const b = document.createElement('div');
+  b.className = 'bubble';
+  b.style.cssText = `width:${size}px;height:${size}px;background:${color};left:calc(${x} - ${size/2}px);bottom:${20 + Math.random()*40}%;animation-duration:${1.5+Math.random()}s;border:1px solid ${color}88;`;
+  parent.appendChild(b);
+  setTimeout(() => b.remove(), 2000);
+}
+
+function resetElectro() {
+  electroRunning = false;
+  clearInterval(electroInterval);
+  document.getElementById('electroBtn').textContent = '▶ Start Current';
+  document.getElementById('electroResult').innerHTML = 'Press Start Current to begin electrolysis.';
+  document.getElementById('ai-electro').classList.remove('visible');
+  document.querySelectorAll('.bubble').forEach(b => b.remove());
+}
+
+// ────────────────────────────────
+// CODING EXPERIMENTS
+// ────────────────────────────────
+
+// JS SANDBOX
+function runCode() {
+  const code = document.getElementById('codeInput').value;
+  const output = document.getElementById('codeOutput');
+  const logs = [];
+  const origLog = console.log;
+  console.log = (...args) => logs.push(args.map(a => typeof a === 'object' ? JSON.stringify(a,null,2) : String(a)).join(' '));
+  try {
+    eval(code);
+    output.style.color = 'var(--green)';
+    output.textContent = logs.length ? logs.join('\n') : '// Code ran with no output.';
+  } catch(e) {
+    output.style.color = 'var(--red)';
+    output.textContent = '// Error: ' + e.message;
+  }
+  console.log = origLog;
+  aiExplain('ai-sandbox','ai-sandbox-text',
+    `A student just ran this JavaScript code:\n\`\`\`\n${code.slice(0,300)}\n\`\`\`\nIn 1-2 sentences, explain simply what it does.`
+  );
+}
+
+// SORTING
+let sortBars = [], sortAlgo = 'bubble', isSorting = false;
+
+function generateBars() {
+  sortBars = Array.from({length: 28}, () => Math.floor(Math.random() * 90) + 10);
+  renderBars(sortBars, [], []);
+  document.getElementById('sortResult').textContent = 'Select an algorithm and press Sort!';
+  document.getElementById('ai-sort').classList.remove('visible');
+}
+
+function renderBars(arr, comparing=[], sorted=[]) {
+  const c = document.getElementById('sortCanvas');
+  c.innerHTML = '';
+  arr.forEach((v, i) => {
+    const b = document.createElement('div');
+    b.className = 'sort-bar' + (comparing.includes(i)?' comparing':'') + (sorted.includes(i)?' sorted':'');
+    b.style.height = v + '%';
+    c.appendChild(b);
+  });
+}
+
+function selectSort(algo) {
+  sortAlgo = algo;
+  document.querySelectorAll('[id^="btn-"]').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-'+algo).classList.add('active');
+}
+
+async function startSort() {
+  if (isSorting) return;
+  isSorting = true;
+  const arr = [...sortBars];
+  const delay = () => new Promise(r => setTimeout(r, 110 - parseInt(document.getElementById('sortSpeed').value)*10));
+  const sorted = [];
+
+  document.getElementById('sortResult').textContent = `Running ${sortAlgo} sort...`;
+
+  if (sortAlgo === 'bubble') {
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = 0; j < arr.length - i - 1; j++) {
+        renderBars(arr, [j, j+1], sorted);
+        await delay();
+        if (arr[j] > arr[j+1]) { [arr[j], arr[j+1]] = [arr[j+1], arr[j]]; }
+      }
+      sorted.push(arr.length - i - 1);
+    }
+  } else if (sortAlgo === 'selection') {
+    for (let i = 0; i < arr.length; i++) {
+      let min = i;
+      for (let j = i+1; j < arr.length; j++) {
+        renderBars(arr, [min, j], sorted);
+        await delay();
+        if (arr[j] < arr[min]) min = j;
+      }
+      [arr[i], arr[min]] = [arr[min], arr[i]];
+      sorted.push(i);
+    }
+  } else if (sortAlgo === 'insertion') {
+    for (let i = 1; i < arr.length; i++) {
+      let j = i;
+      while (j > 0 && arr[j] < arr[j-1]) {
+        renderBars(arr, [j, j-1], sorted);
+        await delay();
+        [arr[j], arr[j-1]] = [arr[j-1], arr[j]];
+        j--;
+      }
+      sorted.push(i);
+    }
+  }
+
+  renderBars(arr, [], arr.map((_,i)=>i));
+  sortBars = arr;
+  isSorting = false;
+  document.getElementById('sortResult').textContent = '✅ Sorted! The array is now in order.';
+  aiExplain('ai-sort','ai-sort-text',
+    `In 2 sentences explain how ${sortAlgo} sort works for a young student who just watched it animate.`
+  );
+}
+
+// GRAVITY SIM
+let balls = [], gravAnim = null;
+const COLORS = ['#00c8ff','#00ffcc','#ff4466','#ffd700','#aa88ff','#ff8800','#00ff88'];
+
+function spawnBall(e) {
+  const canvas = document.getElementById('gravCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const size = parseInt(document.getElementById('ballSize').value);
+  const color = COLORS[balls.length % COLORS.length];
+  balls.push({
+    x: e.clientX - rect.left, y: e.clientY - rect.top,
+    vx: (Math.random()-0.5)*2, vy: (Math.random()-0.5)*2,
+    size, color, mass: size
+  });
+  renderBalls();
+}
+
+function renderBalls() {
+  const canvas = document.getElementById('gravCanvas');
+  canvas.innerHTML = '';
+  balls.forEach(b => {
+    const el = document.createElement('div');
+    el.className = 'grav-ball';
+    el.style.cssText = `width:${b.size}px;height:${b.size}px;left:${b.x-b.size/2}px;top:${b.y-b.size/2}px;--color:${b.color};`;
+    canvas.appendChild(el);
+  });
+}
+
+function startGravity() {
+  stopGravity();
+  gravAnim = setInterval(() => {
+    const canvas = document.getElementById('gravCanvas');
+    if (!canvas) return;
+    const W = canvas.offsetWidth, H = canvas.offsetHeight;
+    const G = parseInt(document.getElementById('gravStrength').value) * 0.05;
+
+    balls.forEach((b, i) => {
+      balls.forEach((b2, j) => {
+        if (i === j) return;
+        const dx = b2.x - b.x, dy = b2.y - b.y;
+        const dist = Math.sqrt(dx*dx + dy*dy) + 0.1;
+        if (dist < b.size + b2.size) return;
+        const force = G * b.mass * b2.mass / (dist * dist);
+        b.vx += (dx/dist) * force / b.mass;
+        b.vy += (dy/dist) * force / b.mass;
+      });
+      b.x += b.vx; b.y += b.vy;
+      if (b.x < b.size/2) { b.x = b.size/2; b.vx *= -0.7; }
+      if (b.x > W-b.size/2) { b.x = W-b.size/2; b.vx *= -0.7; }
+      if (b.y < b.size/2) { b.y = b.size/2; b.vy *= -0.7; }
+      if (b.y > H-b.size/2) { b.y = H-b.size/2; b.vy *= -0.7; }
+      const speed = Math.sqrt(b.vx*b.vx+b.vy*b.vy);
+      if (speed > 8) { b.vx *= 8/speed; b.vy *= 8/speed; }
+    });
+    renderBalls();
+  }, 16);
+}
+
+function stopGravity() { if (gravAnim) { clearInterval(gravAnim); gravAnim = null; } }
+function clearBalls() { balls = []; renderBalls(); }
+
+// ────────────────────────────────
+// DNA BUILDER
+// ────────────────────────────────
+let dnaStrand = [];
+const BASE_COLORS = { A:'#ff6688', T:'#ffaa44', G:'#44ff88', C:'#44aaff' };
+const BASE_PAIRS = { A:'T', T:'A', G:'C', C:'G' };
+const BASE_NAMES = { A:'Adenine', T:'Thymine', G:'Guanine', C:'Cytosine' };
+
+function addBase(base) {
+  dnaStrand.push(base);
+  renderDNA();
+  if (dnaStrand.length >= 6 && dnaStrand.length % 3 === 0) {
+    aiExplain('ai-dna','ai-dna-text',
+      `A student just built a DNA strand: ${dnaStrand.join('-')}. In 1-2 sentences, explain base pairing and what makes DNA a double helix, in simple fun terms for a 12-year-old.`
+    );
+  }
+}
+
+function renderDNA() {
+  const strand = document.getElementById('dnaStrand');
+  const result = document.getElementById('dnaResult');
+  if (dnaStrand.length === 0) {
+    strand.innerHTML = '<span style="color:var(--muted);font-size:0.8rem;">Your DNA strand will appear here...</span>';
+    result.innerHTML = 'Click a base above to start building your DNA strand!';
+    return;
+  }
+  let top = '', bottom = '', rungs = '';
+  dnaStrand.forEach((b, i) => {
+    const pair = BASE_PAIRS[b];
+    top += `<span style="color:${BASE_COLORS[b]};padding:0 2px;" title="${BASE_NAMES[b]}">${b}</span>`;
+    rungs += `<span style="color:rgba(255,255,255,0.15);padding:0 2px;">|</span>`;
+    bottom += `<span style="color:${BASE_COLORS[pair]};padding:0 2px;" title="${BASE_NAMES[pair]}">${pair}</span>`;
+  });
+  strand.innerHTML = `
+    <div style="color:var(--muted);font-size:0.6rem;letter-spacing:0.1em;margin-bottom:4px;">5' ─── TEMPLATE STRAND</div>
+    <div style="font-size:1rem;letter-spacing:4px;">${top}</div>
+    <div style="font-size:0.7rem;letter-spacing:4px;opacity:0.3;">${rungs}</div>
+    <div style="font-size:1rem;letter-spacing:4px;">${bottom}</div>
+    <div style="color:var(--muted);font-size:0.6rem;letter-spacing:0.1em;margin-top:4px;">3' ─── COMPLEMENTARY STRAND</div>
+  `;
+  const codons = [];
+  for (let i = 0; i + 2 < dnaStrand.length; i += 3) codons.push(dnaStrand.slice(i, i+3).join(''));
+  result.innerHTML = `<strong style="color:var(--cyan)">Strand length: ${dnaStrand.length} bases</strong> ${codons.length > 0 ? `| Codons (triplets): <span style="color:var(--green)">${codons.join(' · ')}</span>` : ''}<br><small style="color:var(--muted)">Remember: A always pairs with T, and G always pairs with C — that's Chargaff's Rule!</small>`;
+}
+
+function clearDNA() {
+  dnaStrand = [];
+  renderDNA();
+  document.getElementById('ai-dna').classList.remove('visible');
+}
+
+// ────────────────────────────────
+// ELEMENT EXPLORER
+// ────────────────────────────────
+const ELEMENTS = {
+  H:  { num:1,  name:'Hydrogen',  mass:1.008,   type:'Nonmetal',         color:'#88ccff', electrons:[1], fact:'The most abundant element in the universe! Makes up about 75% of all matter. Stars are mostly hydrogen.', use:'Rocket fuel, water (H₂O), acids' },
+  He: { num:2,  name:'Helium',    mass:4.003,   type:'Noble Gas',         color:'#ffee88', electrons:[2], fact:'So light it floats away into space! It\'s the second most abundant element and never reacts with anything.', use:'Balloons, MRI machines, cooling' },
+  C:  { num:6,  name:'Carbon',    mass:12.011,  type:'Nonmetal',          color:'#aaaaaa', electrons:[2,4], fact:'The backbone of ALL life! DNA, proteins, fats — all built from carbon. Diamond and graphite are both pure carbon!', use:'Diamonds, graphite, DNA, fuels, plastics' },
+  O:  { num:8,  name:'Oxygen',    mass:15.999,  type:'Nonmetal',          color:'#66ddff', electrons:[2,6], fact:'The most abundant element in Earth\'s crust and makes up 21% of the air we breathe! Needed for combustion.', use:'Breathing, burning things, steel-making' },
+  Na: { num:11, name:'Sodium',    mass:22.990,  type:'Alkali Metal',      color:'#ffaa55', electrons:[2,8,1], fact:'Pure sodium EXPLODES when it touches water! But mixed with chlorine it becomes table salt (NaCl) — totally safe!', use:'Table salt, streetlights, soap' },
+  Fe: { num:26, name:'Iron',      mass:55.845,  type:'Transition Metal',  color:'#cc8855', electrons:[2,8,14,2], fact:'Earth\'s core is mostly iron! It\'s been used by humans for 3,000+ years. Iron in your blood carries oxygen.', use:'Steel, buildings, bridges, blood (hemoglobin)' },
+  Au: { num:79, name:'Gold',      mass:196.967, type:'Transition Metal',  color:'#ffd700', electrons:[2,8,18,32,18,1], fact:'Gold never corrodes or tarnishes! It\'s so rare that all gold ever mined would only fill about 3.5 Olympic pools.', use:'Jewelry, electronics, currency, space helmets' },
+  U:  { num:92, name:'Uranium',   mass:238.029, type:'Actinide',          color:'#88ff88', electrons:[2,8,18,32,21,9,2], fact:'Radioactive and extremely dense! 1 kg of uranium contains as much energy as 3,000 tonnes of coal. Used in nuclear reactors.', use:'Nuclear power plants, nuclear weapons (historically)' }
+};
+
+function showElement(sym) {
+  const el = ELEMENTS[sym];
+  document.getElementById('elemDisplay').style.display = 'flex';
+  document.getElementById('elemDisplay').style.flexDirection = 'column';
+  document.getElementById('elemSymbol').textContent = sym;
+  document.getElementById('elemSymbol').style.color = el.color;
+  document.getElementById('elemSymbol').style.borderColor = el.color;
+  document.getElementById('elemSymbol').style.textShadow = `0 0 20px ${el.color}66`;
+  document.getElementById('elemName').textContent = `${el.num}. ${el.name}`;
+  document.getElementById('elemName').style.color = el.color;
+  document.getElementById('elemNumber').textContent = `Atomic Mass: ${el.mass} u | Type: ${el.type}`;
+  document.getElementById('elemFacts').innerHTML = `<strong>Fun fact:</strong> ${el.fact}<br><strong style="color:var(--muted)">Used for:</strong> ${el.use}`;
+  // Draw electron shells
+  const shells = el.electrons;
+  let shellHtml = `<div style="font-size:0.7rem;color:var(--muted);margin-bottom:6px;font-family:'Orbitron',sans-serif;letter-spacing:0.1em;">ELECTRON SHELLS: ${shells.join(' · ')}</div>`;
+  shellHtml += `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">`;
+  shells.forEach((count, i) => {
+    shellHtml += `<div style="display:flex;align-items:center;gap:4px;background:rgba(${parseInt(el.color.slice(1,3),16)},${parseInt(el.color.slice(3,5),16)},${parseInt(el.color.slice(5,7),16)},0.1);border:1px solid ${el.color}33;border-radius:8px;padding:6px 10px;">`;
+    shellHtml += `<span style="font-size:0.65rem;color:var(--muted);">Shell ${i+1}:</span> `;
+    for (let e=0;e<count;e++) shellHtml += `<span style="color:${el.color};font-size:0.8rem;">●</span>`;
+    shellHtml += `</div>`;
+  });
+  shellHtml += `</div>`;
+  document.getElementById('elemElectrons').innerHTML = shellHtml;
+  aiExplain('ai-periodic','ai-periodic-text',
+    `In 1-2 fun sentences, explain ${el.name} (element #${el.num}) for a curious 12-year-old student. Make it exciting!`
+  );
+}
+
+// ────────────────────────────────
+// STATES OF MATTER
+// ────────────────────────────────
+let statesParticles = [], statesAnim = null;
+
+function initStates() {
+  statesParticles = Array.from({length:60}, () => ({
+    x: 80 + Math.random() * (getStatesW() - 160),
+    y: 20 + Math.random() * 160,
+    vx: (Math.random()-0.5)*0.5, vy: (Math.random()-0.5)*0.5,
+    r: 5 + Math.random()*3
+  }));
+}
+
+function getStatesW() {
+  const c = document.getElementById('statesCanvas');
+  return c ? c.offsetWidth || 600 : 600;
+}
+
+function updateStates() {
+  const temp = parseInt(document.getElementById('tempSlider').value);
+  document.getElementById('tempLabel').textContent = temp + '°C';
+  const r = document.getElementById('statesResult');
+  let state, color, speed, spacing;
+  if (temp < 0) {
+    state='SOLID'; color='#88ccff'; speed=0.08; spacing=true;
+    document.getElementById('tempLabel').style.color='#88ccff';
+    r.innerHTML=`At ${temp}°C, this is a <strong style="color:#88ccff">SOLID</strong>. Particles are tightly packed in a fixed grid and can only vibrate in place — that's why solids hold their shape!`;
+  } else if (temp < 100) {
+    state='LIQUID'; color='#00c8ff'; speed=1.2; spacing=false;
+    document.getElementById('tempLabel').style.color='#00c8ff';
+    r.innerHTML=`At ${temp}°C, this is a <strong style="color:#00c8ff">LIQUID</strong>. Particles move freely past each other but stay close — liquids flow and take the shape of their container!`;
+  } else {
+    state='GAS'; color='#ff8800'; speed=3.5; spacing=false;
+    document.getElementById('tempLabel').style.color='#ff8800';
+    r.innerHTML=`At ${temp}°C, this is a <strong style="color:#ff8800">GAS</strong>! Particles zoom around freely at high speed, spreading out to fill any space they're in. That's why gases are invisible!`;
+  }
+  statesParticles.forEach((p, i) => {
+    if (spacing) {
+      const cols = 8;
+      p.x = 60 + (i % cols) * 60 + (Math.random()-0.5)*6;
+      p.y = 25 + Math.floor(i/cols) * 38 + (Math.random()-0.5)*4;
+      p.vx = (Math.random()-0.5)*speed;
+      p.vy = (Math.random()-0.5)*speed;
+    } else {
+      p.vx = (Math.random()-0.5)*speed*2;
+      p.vy = (Math.random()-0.5)*speed*2;
+    }
+    p.color = color;
+    p.state = state;
+  });
+  if (temp % 30 === 0 || temp === -50 || temp === 200) {
+    aiExplain('ai-states','ai-states-text',
+      `Explain in 1-2 fun sentences why matter is a ${state} at ${temp}°C, using particle movement — for a 12-year-old.`
+    );
+  }
+  stopStates();
+  startStatesAnim();
+}
+
+function startStatesAnim() {
+  const canvas = document.getElementById('statesCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const state = statesParticles[0]?.state || 'LIQUID';
+
+  statesAnim = setInterval(() => {
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#050508';
+    ctx.fillRect(0, 0, W, H);
+    statesParticles.forEach(p => {
+      if (state !== 'SOLID') {
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < p.r || p.x > W-p.r) p.vx *= -1;
+        if (p.y < p.r || p.y > H-p.r) p.vy *= -1;
+      } else {
+        p.x += p.vx * 0.3; p.y += p.vy * 0.3;
+        if (Math.abs(p.vx) > 0.5) p.vx *= -1;
+        if (Math.abs(p.vy) > 0.5) p.vy *= -1;
+      }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fillStyle = p.color || '#00c8ff';
+      ctx.shadowColor = p.color || '#00c8ff';
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    });
+  }, 20);
+}
+
+function stopStates() { if (statesAnim) { clearInterval(statesAnim); statesAnim = null; } }
+
+// ────────────────────────────────
+// PENDULUM
+// ────────────────────────────────
+let pendAnim = null, pendTheta = Math.PI/4, pendOmega = 0;
+
+function startPendulum() {
+  stopPendulum();
+  pendTheta = (parseInt(document.getElementById('pendAngle').value) * Math.PI) / 180;
+  pendOmega = 0;
+  pendLoop();
+  aiExplain('ai-pendulum','ai-pendulum-text',
+    'In 1-2 sentences, explain to a 12-year-old why a longer pendulum swings slower and why weight doesn\'t matter — keep it super fun and simple!'
+  );
+}
+
+function resetPendulum() {
+  pendTheta = (parseInt(document.getElementById('pendAngle').value) * Math.PI) / 180;
+  pendOmega = 0;
+  document.getElementById('pendAngleVal').textContent = document.getElementById('pendAngle').value + '°';
+}
+
+function updatePendulum() {
+  document.getElementById('pendLenVal').textContent = document.getElementById('pendLen').value + 'px';
+  document.getElementById('pendGravVal').textContent = (parseInt(document.getElementById('pendGrav').value)*0.98).toFixed(1) + ' m/s²';
+}
+
+function pendLoop() {
+  const canvas = document.getElementById('pendulumCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  let lastTime = null;
+
+  function frame(ts) {
+    if (!document.getElementById('exp-pendulum').classList.contains('active')) return;
+    const L = parseInt(document.getElementById('pendLen').value);
+    const g = parseInt(document.getElementById('pendGrav').value) * 0.5;
+    const dt = lastTime ? Math.min((ts - lastTime)/1000, 0.05) : 0.016;
+    lastTime = ts;
+    const alpha = -(g/L)*Math.sin(pendTheta);
+    pendOmega += alpha * dt;
+    pendOmega *= 0.9985;
+    pendTheta += pendOmega * dt;
+    const ox = W/2, oy = 30;
+    const bx = ox + Math.sin(pendTheta)*L;
+    const by = oy + Math.cos(pendTheta)*L;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#050508'; ctx.fillRect(0,0,W,H);
+    // Trail
+    ctx.strokeStyle='rgba(0,200,255,0.08)'; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(ox, oy, L, 0, Math.PI*2); ctx.stroke();
+    // Rod
+    ctx.strokeStyle='rgba(255,255,255,0.25)'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(ox,oy); ctx.lineTo(bx,by); ctx.stroke();
+    // Pivot
+    ctx.fillStyle='rgba(255,255,255,0.4)';
+    ctx.beginPath(); ctx.arc(ox,oy,5,0,Math.PI*2); ctx.fill();
+    // Ball
+    const grad = ctx.createRadialGradient(bx-4,by-4,2,bx,by,14);
+    grad.addColorStop(0,'#ffffff');
+    grad.addColorStop(0.3,'#00c8ff');
+    grad.addColorStop(1,'#005580');
+    ctx.fillStyle=grad;
+    ctx.shadowColor='#00c8ff'; ctx.shadowBlur=20;
+    ctx.beginPath(); ctx.arc(bx,by,14,0,Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+    // Period
+    const period = 2*Math.PI*Math.sqrt(L/g);
+    document.getElementById('pendResult').innerHTML = `Period = <strong style="color:var(--cyan)">${period.toFixed(2)}s</strong> &nbsp;|&nbsp; Angle = <strong style="color:var(--cyan2)">${(pendTheta*180/Math.PI).toFixed(1)}°</strong> &nbsp;|&nbsp; T = 2π√(L/g)`;
+    pendAnim = requestAnimationFrame(frame);
+  }
+  pendAnim = requestAnimationFrame(frame);
+}
+
+function stopPendulum() { if (pendAnim) { cancelAnimationFrame(pendAnim); pendAnim = null; } }
+
+// ────────────────────────────────
+// WAVE SIMULATOR
+// ────────────────────────────────
+let waveAnim = null, waveT = 0;
+
+function startWave() {
+  stopWave();
+  waveLoop();
+  updateWave();
+}
+
+function updateWave() {
+  document.getElementById('w1fVal').textContent = document.getElementById('wave1Freq').value;
+  document.getElementById('w1aVal').textContent = document.getElementById('wave1Amp').value;
+  document.getElementById('w2fVal').textContent = document.getElementById('wave2Freq').value;
+  document.getElementById('w2aVal').textContent = document.getElementById('wave2Amp').value;
+  const f1 = parseFloat(document.getElementById('wave1Freq').value);
+  const f2 = parseFloat(document.getElementById('wave2Freq').value);
+  const a2 = parseInt(document.getElementById('wave2Amp').value);
+  if (Math.abs(f1 - f2) < 0.6 && a2 > 0) {
+    document.getElementById('waveResult').innerHTML = '🌊 <strong style="color:var(--orange)">BEATING detected!</strong> When two close frequencies combine, you get a throbbing effect — this is how tuning instruments works!';
+  } else if (f1 === f2 && a2 > 0) {
+    document.getElementById('waveResult').innerHTML = '📈 <strong style="color:var(--green)">CONSTRUCTIVE interference!</strong> Same frequency, same direction — waves amplify each other!';
+  } else {
+    document.getElementById('waveResult').innerHTML = 'Two waves combining! When crests meet → bigger wave (constructive ✅). When crest meets trough → cancel out (destructive ❌).';
+  }
+  if (parseFloat(document.getElementById('wave2Amp').value) > 0) {
+    aiExplain('ai-wave','ai-wave-text',
+      `In 1-2 sentences, explain wave interference for a 12-year-old. Wave 1 has freq ${f1}Hz, Wave 2 has freq ${f2}Hz. Mention constructive and destructive interference simply.`
+    );
+  }
+}
+
+function waveLoop() {
+  const canvas = document.getElementById('waveCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  function frame() {
+    if (!document.getElementById('exp-wave').classList.contains('active')) return;
+    const W = canvas.width, H = canvas.height;
+    const cx = H/2;
+    const f1 = parseFloat(document.getElementById('wave1Freq').value);
+    const a1 = parseInt(document.getElementById('wave1Amp').value);
+    const f2 = parseFloat(document.getElementById('wave2Freq').value);
+    const a2 = parseInt(document.getElementById('wave2Amp').value);
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#050508'; ctx.fillRect(0,0,W,H);
+    // Center line
+    ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(0,cx); ctx.lineTo(W,cx); ctx.stroke();
+    // Wave 1
+    ctx.strokeStyle='rgba(0,200,255,0.7)'; ctx.lineWidth=2; ctx.shadowColor='#00c8ff'; ctx.shadowBlur=8;
+    ctx.beginPath();
+    for (let x=0; x<W; x++) { const y = cx + a1*Math.sin(f1*x*0.04 + waveT); x===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
+    ctx.stroke();
+    // Wave 2
+    if (a2 > 0) {
+      ctx.strokeStyle='rgba(170,136,255,0.6)'; ctx.lineWidth=2; ctx.shadowColor='#aa88ff'; ctx.shadowBlur=8;
+      ctx.beginPath();
+      for (let x=0; x<W; x++) { const y = cx + a2*Math.sin(f2*x*0.04 + waveT*1.2); x===0?ctx.moveTo(x,y):ctx.lineTo(x,y); }
+      ctx.stroke();
+      // Combined
+      ctx.strokeStyle='rgba(0,255,204,0.9)'; ctx.lineWidth=2.5; ctx.shadowColor='#00ffcc'; ctx.shadowBlur=12;
+      ctx.beginPath();
+      for (let x=0; x<W; x++) {
+        const y = cx + a1*Math.sin(f1*x*0.04 + waveT) + a2*Math.sin(f2*x*0.04 + waveT*1.2);
+        x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    }
+    ctx.shadowBlur=0;
+    waveT += 0.06;
+    waveAnim = requestAnimationFrame(frame);
+  }
+  waveAnim = requestAnimationFrame(frame);
+}
+
+function stopWave() { if (waveAnim) { cancelAnimationFrame(waveAnim); waveAnim = null; } }
+
+// ────────────────────────────────
+// PROJECTILE MOTION
+// ────────────────────────────────
+let projAnim = null, projPoints = [], projRunning = false;
+
+function initProjectile() {
+  const canvas = document.getElementById('projCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  drawProjBackground(ctx, canvas.width, canvas.height);
+  document.getElementById('projAngle').oninput = () => {
+    document.getElementById('projAngleVal').textContent = document.getElementById('projAngle').value + '°';
+  };
+  document.getElementById('projSpeed').oninput = () => {
+    document.getElementById('projSpeedVal').textContent = document.getElementById('projSpeed').value;
+  };
+  document.getElementById('projGrav').oninput = () => {
+    document.getElementById('projGravVal').textContent = document.getElementById('projGrav').value;
+  };
+}
+
+function drawProjBackground(ctx, W, H) {
+  ctx.fillStyle='#050508'; ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='rgba(0,200,255,0.1)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,H-30); ctx.lineTo(W,H-30); ctx.stroke();
+}
+
+function launchProjectile() {
+  if (projRunning) return;
+  projRunning = true;
+  const canvas = document.getElementById('projCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const angle = parseInt(document.getElementById('projAngle').value) * Math.PI / 180;
+  const speed = parseInt(document.getElementById('projSpeed').value) * 0.25;
+  const g = parseInt(document.getElementById('projGrav').value) * 0.08;
+  let x = 30, y = H - 30;
+  let vx = Math.cos(angle)*speed, vy = -Math.sin(angle)*speed;
+  projPoints = [{x,y}];
+
+  function frame() {
+    if (!document.getElementById('exp-projectile').classList.contains('active')) { projRunning=false; return; }
+    vx *= 0.999; vy += g; x += vx; y += vy;
+    projPoints.push({x, y});
+    drawProjBackground(ctx, W, H);
+    // Trajectory trail
+    ctx.strokeStyle='rgba(0,200,255,0.3)'; ctx.lineWidth=1.5;
+    ctx.beginPath();
+    projPoints.forEach((p,i) => i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+    ctx.stroke();
+    // Ball
+    ctx.fillStyle='#ff8800'; ctx.shadowColor='#ff8800'; ctx.shadowBlur=15;
+    ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI*2); ctx.fill();
+    ctx.shadowBlur=0;
+    if (y >= H-30 && projPoints.length > 5) {
+      projRunning = false;
+      const dist = Math.round(x - 30);
+      const maxH = Math.round(H - 30 - Math.min(...projPoints.map(p=>p.y)));
+      document.getElementById('projResult').innerHTML = `🎯 Landed! Distance: <strong style="color:var(--cyan)">${dist}px</strong> | Max height: <strong style="color:var(--cyan2)">${maxH}px</strong><br><small style="color:var(--muted)">Tip: Try 45° — it always gives the maximum range on flat ground!</small>`;
+      aiExplain('ai-projectile','ai-projectile-text',
+        `A projectile was launched at ${document.getElementById('projAngle').value}° with speed ${document.getElementById('projSpeed').value}. In 2 sentences, explain why 45° gives max range and what forces acted on it — for a 12-year-old.`
+      );
+      return;
+    }
+    projAnim = requestAnimationFrame(frame);
+  }
+  projAnim = requestAnimationFrame(frame);
+}
+
+function clearProjectile() {
+  stopProjectile();
+  projPoints = [];
+  projRunning = false;
+  const canvas = document.getElementById('projCanvas');
+  if (canvas) drawProjBackground(canvas.getContext('2d'), canvas.width, canvas.height);
+  document.getElementById('projResult').innerHTML = 'Set the angle and speed, then click Launch! The optimal angle for maximum distance is always 45°.';
+  document.getElementById('ai-projectile').classList.remove('visible');
+}
+
+function stopProjectile() { if (projAnim) { cancelAnimationFrame(projAnim); projAnim = null; } }
+
+// ────────────────────────────────
+// BINARY & HEX CONVERTER
+// ────────────────────────────────
+let binConvertTimer = null;
+
+function convertFrom(source) {
+  let dec;
+  if (source === 'dec') {
+    dec = parseInt(document.getElementById('decInput').value);
+  } else if (source === 'bin') {
+    dec = parseInt(document.getElementById('binInput').value, 2);
+  } else if (source === 'hex') {
+    dec = parseInt(document.getElementById('hexInput').value, 16);
+  }
+  if (isNaN(dec) || dec < 0) {
+    document.getElementById('binaryResult').innerHTML = 'Enter a valid non-negative number!';
+    return;
+  }
+  dec = Math.min(dec, 65535);
+  if (source !== 'dec') document.getElementById('decInput').value = dec;
+  if (source !== 'bin') document.getElementById('binInput').value = dec.toString(2);
+  if (source !== 'hex') document.getElementById('hexInput').value = dec.toString(16).toUpperCase();
+  // Binary visualization
+  const binary = dec.toString(2).padStart(8, '0');
+  const viz = document.getElementById('binaryViz');
+  viz.innerHTML = '<span style="font-size:0.6rem;color:var(--muted);margin-right:6px;align-self:center;">BITS:</span>' +
+    binary.split('').map((b,i) => `<div style="width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-weight:700;font-size:0.9rem;border:1px solid;transition:all 0.2s;background:${b==='1'?'rgba(0,200,255,0.2)':'rgba(255,255,255,0.03)'};color:${b==='1'?'var(--cyan)':'var(--muted)'};border-color:${b==='1'?'var(--cyan)':'var(--border)'};">${b}</div>`).join('');
+  const bytes = Math.ceil(dec.toString(2).length / 8);
+  document.getElementById('binaryResult').innerHTML = `Decimal <strong style="color:var(--cyan2)">${dec}</strong> = Binary <strong style="color:var(--green)">${dec.toString(2)}</strong> = Hex <strong style="color:var(--purple)">0x${dec.toString(16).toUpperCase()}</strong><br><small style="color:var(--muted)">This takes ${bytes} byte${bytes>1?'s':''} (${bytes*8} bits) to store in memory</small>`;
+  clearTimeout(binConvertTimer);
+  binConvertTimer = setTimeout(() => {
+    if (dec >= 65 && dec <= 122) {
+      aiExplain('ai-binary','ai-binary-text',
+        `In 1-2 fun sentences, explain to a 12-year-old that the letter '${String.fromCharCode(dec)}' is stored as decimal ${dec} (binary ${dec.toString(2)}) in a computer using ASCII encoding. Make it mind-blowing!`
+      );
+    } else {
+      aiExplain('ai-binary','ai-binary-text',
+        `In 1-2 fun sentences explain to a 12-year-old how the number ${dec} is stored as binary ${dec.toString(2)} and hex ${dec.toString(16).toUpperCase()} in a computer. Keep it simple!`
+      );
+    }
+  }, 1000);
+}
+
+// ────────────────────────────────
+// CAESAR CIPHER
+// ────────────────────────────────
+let cipherMode = 'encrypt';
+
+function runCipher() {
+  const shift = parseInt(document.getElementById('cipherShift').value);
+  const input = document.getElementById('cipherInput').value;
+  document.getElementById('cipherShiftVal').textContent = shift;
+  const direction = cipherMode === 'encrypt' ? shift : (26 - shift) % 26;
+  const output = input.split('').map(c => {
+    if (c >= 'a' && c <= 'z') return String.fromCharCode(((c.charCodeAt(0)-97+direction)%26)+97);
+    if (c >= 'A' && c <= 'Z') return String.fromCharCode(((c.charCodeAt(0)-65+direction)%26)+65);
+    return c;
+  }).join('');
+  document.getElementById('cipherOutput').textContent = output;
+  document.getElementById('cipherOutputLabel').textContent = cipherMode==='encrypt' ? `// ENCRYPTED OUTPUT (shift +${shift})` : `// DECRYPTED OUTPUT (shift -${shift})`;
+  // Alphabet mapping
+  const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const shifted = alpha.split('').map(c => alpha[(alpha.indexOf(c)+direction)%26]).join('');
+  document.getElementById('cipherAlphabet').innerHTML =
+    `<span style="color:var(--muted)">Original: </span><span style="color:var(--cyan2);letter-spacing:3px;">${alpha}</span><br>` +
+    `<span style="color:var(--muted)">Cipher:   </span><span style="color:var(--purple);letter-spacing:3px;">${shifted}</span>`;
+}
+
+function swapCipher() {
+  cipherMode = cipherMode==='encrypt' ? 'decrypt' : 'encrypt';
+  const [inp, out] = [document.getElementById('cipherInput'), document.getElementById('cipherOutput')];
+  const tmp = inp.value;
+  inp.value = out.textContent;
+  runCipher();
+}
+
+// init
+generateBars();
+renderDNA();
+</script>
+</body>
+</html>

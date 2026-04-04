@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback & Report — Veltron Labs</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#02020a;--s1:#06060f;--s2:#0a0a18;
+  --c:#00c8ff;--c2:#00ffcc;--c3:#7b5fff;
+  --w:#eef2ff;--m:#3a4060;--m2:#6a7898;
+  --err:#ff4d6d;--ok:#00ffcc;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--w);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9997;opacity:0.45}
+#bg-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:500;padding:0 60px;height:72px;display:flex;align-items:center;justify-content:space-between;background:rgba(2,2,10,.88);backdrop-filter:blur(24px);border-bottom:1px solid rgba(0,200,255,.08)}
+.n-logo{display:flex;align-items:center;gap:12px;text-decoration:none}
+.n-logo-t{font-family:'Orbitron',sans-serif;font-weight:900;font-size:.98rem;letter-spacing:.12em;color:var(--c)}
+.n-logo-t span{color:var(--w)}
+.back-btn{display:inline-flex;align-items:center;gap:7px;padding:8px 18px;background:transparent;border:1px solid rgba(0,200,255,.18);border-radius:4px;color:var(--m2);font-family:'Space Grotesk',sans-serif;font-size:.75rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all .2s}
+.back-btn:hover{border-color:rgba(0,200,255,.5);color:var(--c);background:rgba(0,200,255,.05)}
+
+/* PAGE */
+.page{position:relative;z-index:2;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:120px 24px 80px}
+.page-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(0,200,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,.025) 1px,transparent 1px);background-size:56px 56px;mask-image:radial-gradient(ellipse 80% 80% at 50% 40%,black 20%,transparent 100%);pointer-events:none;z-index:1}
+.page-orb{position:fixed;width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(0,200,255,.06) 0%,rgba(123,95,255,.04) 40%,transparent 65%);top:40%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:1;animation:pulse 7s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:translate(-50%,-50%) scale(1)}50%{transform:translate(-50%,-50%) scale(1.08)}}
+
+/* CARD */
+.card{position:relative;z-index:2;width:100%;max-width:640px;background:var(--s1);border:1px solid rgba(0,200,255,.12);border-radius:4px;overflow:hidden;animation:cardIn .7s cubic-bezier(.16,1,.3,1) both}
+@keyframes cardIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--c),var(--c2),transparent)}
+.card-head{padding:40px 48px 32px;border-bottom:1px solid rgba(0,200,255,.07)}
+.card-eyebrow{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--c);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.card-eyebrow::before{content:'';width:16px;height:1px;background:var(--c)}
+.card-title{font-family:'Orbitron',sans-serif;font-size:1.6rem;font-weight:700;color:var(--w);margin-bottom:10px;line-height:1.15}
+.card-sub{font-size:.88rem;color:var(--m2);line-height:1.7}
+.card-body{padding:36px 48px 44px;display:flex;flex-direction:column;gap:24px}
+
+/* FORM FIELDS */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{display:flex;flex-direction:column;gap:8px}
+.field label{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.18em;text-transform:uppercase;color:var(--m2);display:flex;align-items:center;gap:8px}
+.opt-badge{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:2px;padding:1px 6px;font-size:.5rem;letter-spacing:.1em;color:var(--m);text-transform:uppercase}
+.req-star{color:var(--c2);margin-left:2px}
+
+input[type=text],input[type=email],textarea,select{
+  width:100%;background:rgba(255,255,255,.03);border:1px solid rgba(0,200,255,.12);border-radius:4px;
+  padding:12px 16px;color:var(--w);font-family:'Space Grotesk',sans-serif;font-size:.9rem;
+  outline:none;transition:border-color .2s,background .2s,box-shadow .2s;
+  appearance:none;-webkit-appearance:none
+}
+input[type=text]:focus,input[type=email]:focus,textarea:focus,select:focus{
+  border-color:rgba(0,200,255,.45);background:rgba(0,200,255,.03);
+  box-shadow:0 0 0 3px rgba(0,200,255,.07)
+}
+input[type=text]::placeholder,input[type=email]::placeholder,textarea::placeholder{color:rgba(255,255,255,.15)}
+input.err,select.err,textarea.err{border-color:rgba(255,77,109,.5);box-shadow:0 0 0 3px rgba(255,77,109,.07)}
+
+/* REPORT TYPE */
+.report-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.report-opt{display:none}
+.report-label{display:flex;flex-direction:column;align-items:center;gap:7px;padding:14px 8px;background:rgba(255,255,255,.02);border:1px solid rgba(0,200,255,.1);border-radius:4px;cursor:pointer;transition:all .2s;text-align:center}
+.report-label:hover{background:rgba(0,200,255,.05);border-color:rgba(0,200,255,.25)}
+.report-opt:checked+.report-label{background:rgba(0,200,255,.1);border-color:var(--c);box-shadow:0 0 16px rgba(0,200,255,.12)}
+.report-ico{font-size:1.3rem;line-height:1}
+.report-txt{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--m2)}
+.report-opt:checked+.report-label .report-txt{color:var(--c)}
+
+/* SELECT arrow */
+.select-wrap{position:relative}
+.select-wrap::after{content:'';position:absolute;right:14px;top:50%;transform:translateY(-50%);width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid var(--m2);pointer-events:none}
+select{padding-right:36px;cursor:pointer;color:var(--w)}
+select option{background:var(--s2);color:var(--w)}
+
+textarea{resize:vertical;min-height:130px;line-height:1.65}
+
+/* CHAR COUNT */
+.field-footer{display:flex;justify-content:flex-end;margin-top:-18px}
+.char-count{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--m);letter-spacing:.08em}
+.char-count.warn{color:var(--err)}
+
+/* ERROR MSG */
+.field-err{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--err);letter-spacing:.06em;display:none}
+.field-err.show{display:block}
+
+/* DIVIDER */
+.divider{width:100%;height:1px;background:linear-gradient(90deg,transparent,rgba(0,200,255,.1),transparent);margin:4px 0}
+
+/* SUBMIT */
+.submit-btn{width:100%;padding:16px;background:linear-gradient(135deg,var(--c),var(--c2));color:#000;font-family:'Orbitron',sans-serif;font-weight:700;font-size:.78rem;letter-spacing:.12em;border:none;border-radius:4px;cursor:pointer;transition:transform .2s,box-shadow .2s,opacity .2s;box-shadow:0 0 40px rgba(0,200,255,.25),inset 0 1px 0 rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;gap:10px}
+.submit-btn:hover{transform:translateY(-2px);box-shadow:0 0 60px rgba(0,200,255,.45),0 8px 32px rgba(0,200,255,.2)}
+.submit-btn:active{transform:translateY(0)}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.submit-btn .spin{width:16px;height:16px;border:2px solid rgba(0,0,0,.3);border-top-color:#000;border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* SUCCESS STATE */
+.success-screen{display:none;flex-direction:column;align-items:center;text-align:center;padding:56px 48px;gap:20px}
+.success-screen.show{display:flex}
+.success-icon{width:64px;height:64px;border-radius:50%;background:rgba(0,255,204,.08);border:1px solid rgba(0,255,204,.25);display:flex;align-items:center;justify-content:center;animation:popIn .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
+.success-icon svg{color:var(--c2)}
+.success-title{font-family:'Orbitron',sans-serif;font-size:1.3rem;font-weight:700;color:var(--w)}
+.success-sub{color:var(--m2);font-size:.9rem;line-height:1.7;max-width:340px}
+.success-back{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:transparent;border:1px solid rgba(0,200,255,.25);border-radius:4px;color:var(--c);font-family:'Space Grotesk',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;margin-top:8px}
+.success-back:hover{background:rgba(0,200,255,.07);border-color:rgba(0,200,255,.5)}
+
+/* TOAST */
+.toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(100px);background:rgba(255,77,109,.12);border:1px solid rgba(255,77,109,.3);border-radius:4px;padding:12px 24px;font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.08em;color:var(--err);z-index:9999;transition:transform .3s cubic-bezier(.16,1,.3,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:640px){nav{padding:0 20px}.card-head,.card-body{padding-left:28px;padding-right:28px}.field-row{grid-template-columns:1fr}.report-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="page-grid"></div>
+<div class="page-orb"></div>
+
+<nav>
+  <a href="index.html" class="n-logo">
+    <svg width="22" height="26" viewBox="0 0 200 232" xmlns="http://www.w3.org/2000/svg">
+      <defs><linearGradient id="ng" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00c8ff"/><stop offset="100%" stop-color="#00ffcc"/></linearGradient></defs>
+      <polygon points="100,32 164,68 164,142 100,178 36,142 36,68" fill="rgba(0,200,255,.1)" stroke="url(#ng)" stroke-width="4"/>
+      <polygon points="68,84 100,152 132,84 118,84 100,124 82,84" fill="url(#ng)"/>
+    </svg>
+    <span class="n-logo-t">VELTRON<span> LABS</span></span>
+  </a>
+  <a href="index.html" class="back-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Back
+  </a>
+</nav>
+
+<div class="page">
+  <div class="card" id="card">
+
+    <!-- FORM -->
+    <div id="form-view">
+      <div class="card-head">
+        <div class="card-eyebrow">Veltron Labs</div>
+        <div class="card-title">Feedback & Report</div>
+        <div class="card-sub">Found a bug? Have a suggestion? We read every submission and use it to make Veltron better.</div>
+      </div>
+
+      <div class="card-body">
+
+        <!-- Name row -->
+        <div class="field-row">
+          <div class="field">
+            <label>First Name <span class="opt-badge">Optional</span></label>
+            <input type="text" id="fname" placeholder="Alex" maxlength="50">
+          </div>
+          <div class="field">
+            <label>Last Name <span class="opt-badge">Optional</span></label>
+            <input type="text" id="lname" placeholder="Smith" maxlength="50">
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="field">
+          <label>Email <span class="opt-badge">Optional</span></label>
+          <input type="email" id="email" placeholder="you@example.com" maxlength="120">
+          <span class="field-err" id="email-err">Please enter a valid email address.</span>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Report type -->
+        <div class="field">
+          <label>Report Type <span class="req-star">*</span></label>
+          <div class="report-grid">
+            <div>
+              <input type="radio" name="rtype" id="r-bug" value="Bug" class="report-opt">
+              <label for="r-bug" class="report-label">
+                <span class="report-ico">🐛</span>
+                <span class="report-txt">Bug</span>
+              </label>
+            </div>
+            <div>
+              <input type="radio" name="rtype" id="r-sug" value="Suggestion" class="report-opt">
+              <label for="r-sug" class="report-label">
+                <span class="report-ico">💡</span>
+                <span class="report-txt">Suggestion</span>
+              </label>
+            </div>
+            <div>
+              <input type="radio" name="rtype" id="r-q" value="Question" class="report-opt">
+              <label for="r-q" class="report-label">
+                <span class="report-ico">❓</span>
+                <span class="report-txt">Question</span>
+              </label>
+            </div>
+            <div>
+              <input type="radio" name="rtype" id="r-other" value="Other" class="report-opt">
+              <label for="r-other" class="report-label">
+                <span class="report-ico">📝</span>
+                <span class="report-txt">Other</span>
+              </label>
+            </div>
+          </div>
+          <span class="field-err" id="type-err">Please select a report type.</span>
+        </div>
+
+        <!-- Message -->
+        <div class="field">
+          <label>Message <span class="req-star">*</span></label>
+          <textarea id="message" placeholder="Describe your issue, idea, or question in as much detail as you'd like..." maxlength="2000" oninput="updateCount()"></textarea>
+          <div class="field-footer">
+            <span class="char-count" id="char-count">0 / 2000</span>
+          </div>
+          <span class="field-err" id="msg-err">Please write a message before submitting.</span>
+        </div>
+
+        <!-- Submit -->
+        <button class="submit-btn" id="submit-btn" onclick="submitForm()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Send Feedback
+        </button>
+
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="success-view">
+      <div class="success-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="success-title">Feedback Received!</div>
+      <div class="success-sub">Thanks for taking the time to reach out. We'll review your message and get back to you if needed.</div>
+      <a href="index.html" class="success-back">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Veltron Labs
+      </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Canvas particles ──
+const cv=document.getElementById('bg-canvas'),cx=cv.getContext('2d');
+let W,H;
+function rsz(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
+rsz();window.addEventListener('resize',rsz);
+const pts=Array.from({length:60},()=>({x:Math.random()*1920,y:Math.random()*1080,vx:(Math.random()-.5)*.14,vy:(Math.random()-.5)*.14,s:Math.random()*.9+.3,a:Math.random()*.25+.05,c:Math.random()>.6?'0,200,255':'0,255,204'}));
+function drawCV(){
+  cx.clearRect(0,0,W,H);
+  for(let i=0;i<pts.length;i++){
+    pts[i].x+=pts[i].vx;pts[i].y+=pts[i].vy;
+    if(pts[i].x<0||pts[i].x>W)pts[i].vx*=-1;
+    if(pts[i].y<0||pts[i].y>H)pts[i].vy*=-1;
+    for(let j=i+1;j<pts.length;j++){
+      const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);
+      if(d<120){cx.beginPath();cx.moveTo(pts[i].x,pts[i].y);cx.lineTo(pts[j].x,pts[j].y);cx.strokeStyle=`rgba(0,200,255,${.025*(1-d/120)})`;cx.lineWidth=.5;cx.stroke()}
+    }
+    cx.beginPath();cx.arc(pts[i].x,pts[i].y,pts[i].s,0,Math.PI*2);cx.fillStyle=`rgba(${pts[i].c},${pts[i].a})`;cx.fill();
+  }
+  requestAnimationFrame(drawCV);
+}
+drawCV();
+
+// ── Char counter ──
+function updateCount(){
+  const ta=document.getElementById('message');
+  const cc=document.getElementById('char-count');
+  const len=ta.value.length;
+  cc.textContent=len+' / 2000';
+  cc.classList.toggle('warn',len>1800);
+}
+
+// ── Toast ──
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3500);
+}
+
+// ── Validate email ──
+function validEmail(e){return/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)}
+
+// ── Clear errors ──
+function clearErr(id){document.getElementById(id).classList.remove('show')}
+function showErr(id){document.getElementById(id).classList.add('show')}
+function markField(el,bad){el.classList.toggle('err',bad)}
+
+// ── Submit ──
+async function submitForm(){
+  // Gather values
+  const fname=document.getElementById('fname').value.trim();
+  const lname=document.getElementById('lname').value.trim();
+  const email=document.getElementById('email').value.trim();
+  const rtype=document.querySelector('input[name="rtype"]:checked')?.value||'';
+  const message=document.getElementById('message').value.trim();
+
+  // Reset errors
+  ['email-err','type-err','msg-err'].forEach(clearErr);
+  markField(document.getElementById('email'),false);
+  markField(document.getElementById('message'),false);
+
+  // Validate
+  let valid=true;
+  if(email&&!validEmail(email)){showErr('email-err');markField(document.getElementById('email'),true);valid=false}
+  if(!rtype){showErr('type-err');valid=false}
+  if(!message){showErr('msg-err');markField(document.getElementById('message'),true);valid=false}
+  if(!valid)return;
+
+  // Disable button + show spinner
+  const btn=document.getElementById('submit-btn');
+  btn.disabled=true;
+  btn.innerHTML='<div class="spin"></div> Sending...';
+
+  // Build the email body
+  const name=[fname,lname].filter(Boolean).join(' ')||'Anonymous';
+  const body=`New ${rtype} report from Veltron Labs Feedback Form
+
+Name: ${name}
+Email: ${email||'Not provided'}
+Type: ${rtype}
+
+Message:
+${message}
+
+---
+Sent via Veltron Labs Feedback Page`;
+
+  // Send via Web3Forms — free, no backend needed, goes straight to your inbox
+  try{
+    const res=await fetch('https://api.web3forms.com/submit',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({
+        access_key:'YOUR_WEB3FORMS_KEY', // ← replace after setup (see note below)
+        subject:`[Veltron Feedback] ${rtype} — ${name}`,
+        from_name:'Veltron Labs Feedback',
+        replyto:email||'',
+        name,email:email||'Not provided',
+        'Report Type':rtype,
+        message
+      })
+    });
+    const data=await res.json();
+    if(data.success){
+      document.getElementById('form-view').style.display='none';
+      document.getElementById('success-view').classList.add('show');
+    }else{
+      throw new Error('Send failed');
+    }
+  }catch(e){
+    // Fallback: open mailto directly
+    const mailBody=encodeURIComponent(body);
+    const mailSubject=encodeURIComponent(`[Veltron Feedback] ${rtype} — ${name}`);
+    window.open(`mailto:VeltronLabs90@outlook.com?subject=${mailSubject}&body=${mailBody}`);
+    document.getElementById('form-view').style.display='none';
+    document.getElementById('success-view').classList.add('show');
+  }
+
+  btn.disabled=false;
+  btn.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send Feedback';
+}
+</script>
+</body>
+</html>
