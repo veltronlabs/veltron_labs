@@ -337,29 +337,32 @@ ${message}
 ---
 Sent via Veltron Labs Feedback Page`;
 
-  // Send via Web3Forms — free, no backend needed, goes straight to your inbox
+  // Send via Web3Forms using FormData (most reliable method)
   try{
+    const fd=new FormData();
+    fd.append('access_key','4186ac96-edd6-48c0-a748-254dd8036c7f'); // ← your key here
+    fd.append('subject',`[Veltron Feedback] ${rtype} — ${name}`);
+    fd.append('from_name','Veltron Labs Feedback');
+    fd.append('replyto',email||'noreply@veltronlabs.com');
+    fd.append('name',name);
+    fd.append('email',email||'Not provided');
+    fd.append('Report Type',rtype);
+    fd.append('message',message);
+
     const res=await fetch('https://api.web3forms.com/submit',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Accept':'application/json'},
-      body:JSON.stringify({
-        access_key: '4186ac96-edd6-48c0-a748-254dd8036c7f', // ← replace after setup (see note below)
-        subject:`[Veltron Feedback] ${rtype} — ${name}`,
-        from_name:'Veltron Labs Feedback',
-        replyto:email||'',
-        name,email:email||'Not provided',
-        'Report Type':rtype,
-        message
-      })
+      body:fd
     });
     const data=await res.json();
     if(data.success){
       document.getElementById('form-view').style.display='none';
       document.getElementById('success-view').classList.add('show');
     }else{
-      throw new Error('Send failed');
+      console.error('Web3Forms error:',data);
+      throw new Error(data.message||'Send failed');
     }
   }catch(e){
+    console.error('Submission error:',e);
     // Fallback: open mailto directly
     const mailBody=encodeURIComponent(body);
     const mailSubject=encodeURIComponent(`[Veltron Feedback] ${rtype} — ${name}`);
